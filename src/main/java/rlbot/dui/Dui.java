@@ -29,7 +29,7 @@ public class Dui implements Bot {
     public static ArrayList<State> states = new ArrayList<State>();
     
     /*The dodge timer used to determine which point of the dodge we are in, and whether we are eligible to dodge*/
-    private long timer = 0L;
+    private long dodgeTimer = 0L;
 
     public Dui(int playerIndex){
         this.playerIndex = playerIndex;           
@@ -43,31 +43,37 @@ public class Dui implements Bot {
     }
 
     private ControlsOutput processInput(DataPacket input){
+    	
+    	//Get the car (very useful)
         final CarData car = input.car;
 
-        //Initialise lots of vectors
+        //Get vectors
     	final Vector3 ballPosition3 = input.ball.position;
         final Vector2 ballPosition = ballPosition3.flatten();        
         final Vector2 carPosition = car.position.flatten();
         final Vector2 carDirection = car.orientation.noseVector.flatten();
+        
+        //TODO: Make vectors when Dui is initialised
+        
+        //Make lots of vectors
         final Vector2 ownGoal = new Vector2(0, car.team == 0 ? -5120 : 5120);
         final Vector2 enemyGoal = new Vector2(0, car.team == 0 ? 5120 : -5120);
         
-        //Initialise distances in unreal units
+        //Get distances in unreal units
         final double ballDistance = carPosition.distance(ballPosition);
         final double ownGoalDistance = carPosition.distance(ownGoal);
         
-        //Initialise degrees to turn to certain vectors from the car
+        //Get degrees to turn to certain vectors from the car
         final double steerBall = Math.toDegrees(carDirection.correctionAngle(ballPosition.minus(carPosition)));
         final double steerEnemyGoal = Math.toDegrees(carDirection.correctionAngle(enemyGoal.minus(carPosition)));
         
-        //Start printing and deal with the weights and decided angle
+        //Start printing, deal with the weights and the decided angle
         System.out.print(this.playerIndex + ": ");
         double totalWeight = 0, greatestWeight = 1;
         double[] angles = new double[states.size()];
         double chosen = 0;
         
-        //Initialise a renderer to show graphics for Dui
+        //Get a renderer to show graphics for Dui
         Renderer r = BotLoopRenderer.forBotLoop(this);
         
         //Write the ball height on the ball
@@ -90,7 +96,10 @@ public class Dui implements Bot {
         	}
         }
         
+        //Steering output, determined by what the weights have given us
         final float steer = ((chosen > 0 ? -1 : 1)) * (float)Math.min((1D / steerThreshold) * Math.abs(chosen), 1D);
+        
+        //Controller to send at the end
         ControlsOutput control = new ControlsOutput().withSteer(steer).withThrottle(ballPosition3.z > 140 ? Math.min(1F, (float)ballDistance / 1200F) : 1F).withSlide(Math.abs(chosen) > 105);
         
         //Boosting is determined by how little we are turning, whether are are on the ground, and whether we are wanting to go fast
@@ -106,24 +115,26 @@ public class Dui implements Bot {
         
         System.out.print(dodge ? "Dodge" : "Go");
         
+        //TODO: Make this it's own method
+        
         //Dealing with the actual process of dodging (where we are in the action of dodging)
         if(dodge){
-        	long timerChange = System.currentTimeMillis() - timer;
+        	final long timerChange = System.currentTimeMillis() - dodgeTimer;
         	if(timerChange > 2200){
-        		timer = System.currentTimeMillis();
+        		dodgeTimer = System.currentTimeMillis(); //We can now dodge again (recharge)
         	}else if(timerChange <= 100){
-        		control.withJump(true);
-        		control.withPitch(-1);
+        		control.withJump(true); //Jump
+        		control.withPitch(-1); //Tip forward
         	}else if(timerChange <= 150){
-        		control.withJump(false);
-        		control.withPitch(-1);
+        		control.withJump(false); //Stop jumping
+        		control.withPitch(-1); //Keep tipping
         	}else if(timerChange <= 1000){
-        		control.withJump(true);
-        		control.withPitch(-1);
-        		control.withYaw(steer);
+        		control.withJump(true); //Dodge
+        		control.withPitch(-1); //Still keep tipping
+        		control.withYaw(steer); //Point the way we intend to go
         	}
-        }else if(car.position.z > 800){
-        	control.withJump(System.currentTimeMillis() % 100 >= 50); //If we get too high up the wall, it is useful to jump down
+        }else if(car.position.z > 800){ //If we get too high up the wall, it is useful to jump down
+        	control.withJump(System.currentTimeMillis() % 100 >= 50); 
         }
         
         System.out.println(); //End the line we printed
@@ -151,6 +162,8 @@ public class Dui implements Bot {
     public static double r(double r){
     	return Math.round(r * 100D) / 100D;
     }
+    
+    //TODO: Remove this dumb method
     
     /*Returns the difference between two values*/
     public static double dif(double one, double two){
