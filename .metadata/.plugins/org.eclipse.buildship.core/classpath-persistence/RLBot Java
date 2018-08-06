@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-<classpathentry kind="lib" path="C:/Users/robbieh0102/.gradle/caches/modules-2/files-2.1/org.rlbot.commons/framework/0.0.9/872e87a7afeba21e91e3e6b56b2fe352234962b9/framework-0.0.9.jar" sourcepath="C:/Users/robbieh0102/.gradle/caches/modules-2/files-2.1/org.rlbot.commons/framework/0.0.9/7d0f04ceb669e96d11f21a16c761eed77cb31c0e/framework-0.0.9-sources.jar"/>
-<classpathentry kind="lib" path="C:/Users/robbieh0102/.gradle/caches/modules-2/files-2.1/net.java.dev.jna/jna-platform/4.5.1/117d52c9f672d8b7ea80a81464c33ef843de9254/jna-platform-4.5.1.jar" sourcepath="C:/Users/robbieh0102/.gradle/caches/modules-2/files-2.1/net.java.dev.jna/jna-platform/4.5.1/2793e1c7c5e916e909addff50dd38d37ff848bf6/jna-platform-4.5.1-sources.jar"/>
-<classpathentry kind="lib" path="C:/Users/robbieh0102/.gradle/caches/modules-2/files-2.1/net.java.dev.jna/jna/4.5.1/65bd0cacc9c79a21c6ed8e9f588577cd3c2f85b9/jna-4.5.1.jar" sourcepath="C:/Users/robbieh0102/.gradle/caches/modules-2/files-2.1/net.java.dev.jna/jna/4.5.1/965bf0f4cf5b71c2b1e9bb5a8d7b6919020e0492/jna-4.5.1-sources.jar"/>
-<classpathentry kind="lib" path="C:/Users/robbieh0102/.gradle/caches/modules-2/files-2.1/net.sf.py4j/py4j/0.10.6/2204994fdaa4ba9c9e6f35fa3c700df454954cdf/py4j-0.10.6.jar" sourcepath="C:/Users/robbieh0102/.gradle/caches/modules-2/files-2.1/net.sf.py4j/py4j/0.10.6/9b003eb9218599d46be7fc96682f004ef522d581/py4j-0.10.6-sources.jar"/>
-<classpathentry kind="lib" path="C:/Users/robbieh0102/.gradle/caches/modules-2/files-2.1/com.github.davidmoten/flatbuffers-java/1.9.0.1/eaa1b27095bb5127879458bc2ee1b78e00d4a20/flatbuffers-java-1.9.0.1.jar" sourcepath="C:/Users/robbieh0102/.gradle/caches/modules-2/files-2.1/com.github.davidmoten/flatbuffers-java/1.9.0.1/e5e796e7f1c2c84b5fa4fbff0ee9b40bde9c3870/flatbuffers-java-1.9.0.1-sources.jar"/>
-<classpathentry kind="lib" path="E:/RLBot Java/build/dll"/>
-</classpath>
