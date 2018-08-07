@@ -46,7 +46,7 @@ public class Dui implements Bot {
         new BoostState();
         new DefendState();
         new ReturnState();
-        new TestState();
+        new Wait();
     }
 
     private ControlsOutput processInput(DataPacket input){
@@ -98,7 +98,7 @@ public class Dui implements Bot {
         //Go through all the states again in order to determine which way Dui should steer
         for(byte i = 0; i < states.size(); i++){
         	State s = states.get(i);
-        	if(s.getWeight() > 0){ //Negative weights should be ignored
+        	if(s.getWeight() >= 0.01){ //Negative weights should be ignored
         		chosen += (angles[i] * ((s.getWeight() / greatestWeight) / (totalWeight / greatestWeight)));
         		System.out.print(s.toString(greatestWeight) + ", "); //Print useful weighted outputs
         	}
