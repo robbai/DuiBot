@@ -23,7 +23,7 @@ public class Dui implements Bot {
     private int playerIndex;
 
 	/**The threshold at which the car should make smoother turns in degrees, degree turns below this will not be jerky*/
-	private final int steerThreshold = 18;
+	private final int steerThreshold = 12;
 	
 	/**The list of states for Dui to work with*/
     public static ArrayList<State> states = new ArrayList<State>();
@@ -46,6 +46,7 @@ public class Dui implements Bot {
         new BoostState();
         new DefendState();
         new ReturnState();
+        new TestState();
     }
 
     private ControlsOutput processInput(DataPacket input){
@@ -107,17 +108,17 @@ public class Dui implements Bot {
         final float steer = ((chosen > 0 ? -1 : 1)) * (float)Math.min((1D / steerThreshold) * Math.abs(chosen), 1D);
         
         //Controller to send at the end
-        ControlsOutput control = new ControlsOutput().withSteer(steer).withThrottle(ballPosition3.z > 140 ? Math.min(1F, (float)ballDistance / 1200F) : 1F).withSlide(Math.abs(chosen) > 105);
+        ControlsOutput control = new ControlsOutput().withSteer(steer).withThrottle(ballPosition3.z > 110 ? Math.min(1F, (float)ballDistance / 2800F) : 1F).withSlide(Math.abs(chosen) > 92);
         
         //Boosting is determined by how little we are turning, whether are are on the ground, and whether we are wanting to go fast
-        control = control.withBoost(Math.abs(steer) < 0.3 && car.hasWheelContact && control.getThrottle() > 0.5);
+        control = control.withBoost(Math.abs(steer) < 0.28 && car.hasWheelContact && control.getThrottle() > 0.6);
         
         //Dealing with whether we should dodge
         boolean dodge; 
         if(KickoffState.isKickoff(input.ball)){
-        	dodge = (ballDistance < 1200 && car.boost < 20) || !car.hasWheelContact; //Dodge earlier in a kickoff than normal
+        	dodge = (ballDistance < 1200 && car.boost < 30) || !car.hasWheelContact; //Dodge earlier in a kickoff than normal
         }else{
-        	dodge = (((ballDistance > 3000 && car.velocity.magnitude() > 800) || (ballDistance < 600 && ballPosition3.z < 220)) && (Math.abs(steerBall) < 25 || ballDistance < 400) && car.position.z < 200) || !car.hasWheelContact;
+        	dodge = (((ballDistance > 3000 && car.velocity.magnitude() > 600) || (ballDistance < 600 && ballPosition3.z < 220)) && (Math.abs(steerBall) < 14 || ballDistance < 300) && car.position.z < 140) || !car.hasWheelContact;
         }
         
         System.out.print(dodge ? "Dodge" : "Go");

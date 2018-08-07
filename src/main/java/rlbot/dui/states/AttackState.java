@@ -1,3 +1,4 @@
+
 package rlbot.dui.states;
 
 import java.awt.Color;
@@ -29,7 +30,10 @@ public class AttackState extends State {
         		return steerBall;
         	}
         	
-        	double y = Dui.dif(steerEnemyGoal, steerBall) * 2.2 * (car.team == 0 ? -1 : 1) * Math.min(3, ballDistance / 350) / 2 + ballPosition.y;        	
+//        	double y = Dui.dif(steerEnemyGoal, steerBall) * 1.9 * (car.team == 0 ? -1 : 1) * Math.min(3, ballDistance / 350) / 2 + ballPosition.y;
+        	
+        	double y = (carPosition.y + ballPosition.y * 2) / 3;
+        	
         	double x = (ballPosition.x) * Dui.dif(enemyGoal.y, carPosition.y) / Dui.dif(enemyGoal.y, ballPosition.y);
         	
         	if(x > 4000){
