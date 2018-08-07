@@ -22,14 +22,20 @@ public class Dui implements Bot {
 	
     private int playerIndex;
 
-	/*The threshold at which the car should make smoother turns in degrees, degree turns below this will not be jerky*/
+	/**The threshold at which the car should make smoother turns in degrees, degree turns below this will not be jerky*/
 	private final int steerThreshold = 18;
 	
-	/*The list of states for Dui to work with*/
+	/**The list of states for Dui to work with*/
     public static ArrayList<State> states = new ArrayList<State>();
     
-    /*The dodge timer used to determine which point of the dodge we are in, and whether we are eligible to dodge*/
+    /**The dodge timer used to determine which point of the dodge we are in, and whether we are eligible to dodge*/
     private long dodgeTimer = 0L;
+    
+    /**Team index of the current car*/
+    private int team = -10;
+    
+    /**Dui's goal*/public Vector2 ownGoal;
+    /**Dui's target*/public Vector2 enemyGoal;
 
     public Dui(int playerIndex){
         this.playerIndex = playerIndex;           
@@ -46,19 +52,20 @@ public class Dui implements Bot {
     	
     	//Get the car (very useful)
         final CarData car = input.car;
+        
+        //Set the goal vectors if not already set correctly
+        if(team != car.team){
+        	ownGoal = new Vector2(0, car.team == 0 ? -5120 : 5120);
+            enemyGoal = new Vector2(0, car.team == 0 ? 5120 : -5120);
+            team = car.team;
+        }
 
         //Get vectors
     	final Vector3 ballPosition3 = input.ball.position;
         final Vector2 ballPosition = ballPosition3.flatten();        
         final Vector2 carPosition = car.position.flatten();
         final Vector2 carDirection = car.orientation.noseVector.flatten();
-        
-        //TODO: Make vectors when Dui is initialised
-        
-        //Make lots of vectors
-        final Vector2 ownGoal = new Vector2(0, car.team == 0 ? -5120 : 5120);
-        final Vector2 enemyGoal = new Vector2(0, car.team == 0 ? 5120 : -5120);
-        
+                
         //Get distances in unreal units
         final double ballDistance = carPosition.distance(ballPosition);
         final double ownGoalDistance = carPosition.distance(ownGoal);
@@ -114,26 +121,11 @@ public class Dui implements Bot {
         }
         
         System.out.print(dodge ? "Dodge" : "Go");
-        
-        //TODO: Make this it's own method
-        
+                
         //Dealing with the actual process of dodging (where we are in the action of dodging)
         if(dodge){
-        	final long timerChange = System.currentTimeMillis() - dodgeTimer;
-        	if(timerChange > 2200){
-        		dodgeTimer = System.currentTimeMillis(); //We can now dodge again (recharge)
-        	}else if(timerChange <= 100){
-        		control.withJump(true); //Jump
-        		control.withPitch(-1); //Tip forward
-        	}else if(timerChange <= 150){
-        		control.withJump(false); //Stop jumping
-        		control.withPitch(-1); //Keep tipping
-        	}else if(timerChange <= 1000){
-        		control.withJump(true); //Dodge
-        		control.withPitch(-1); //Still keep tipping
-        		control.withYaw(steer); //Point the way we intend to go
-        	}
-        }else if(car.position.z > 800){ //If we get too high up the wall, it is useful to jump down
+        	control = dodge(control, steer);
+        }else if(car.position.z > 800){ //If we get too high up the wall, it is useful to simply jump down
         	control.withJump(System.currentTimeMillis() % 100 >= 50); 
         }
         
@@ -158,16 +150,33 @@ public class Dui implements Bot {
         System.out.println("Retiring Dui (" + playerIndex + ")");
     }
     
-    /*Rounds to two decimal places*/
+    /**Rounds to two decimal places*/
     public static double r(double r){
     	return Math.round(r * 100D) / 100D;
     }
     
-    //TODO: Remove this dumb method
-    
-    /*Returns the difference between two values*/
+    /**Returns the difference between two values*/
     public static double dif(double one, double two){
     	return Math.max(one, two) - Math.min(one, two);
     }
+    
+    /**Return controls that are dodging*/
+	private ControlsOutput dodge(ControlsOutput control, float steer){
+		final long timerChange = System.currentTimeMillis() - dodgeTimer;
+    	if(timerChange > 2200){
+    		dodgeTimer = System.currentTimeMillis(); //We can now dodge again (recharged)
+    	}else if(timerChange <= 100){
+    		control.withJump(true); //Jump
+    		control.withPitch(-1); //Tip forward
+    	}else if(timerChange <= 150){
+    		control.withJump(false); //Stop jumping
+    		control.withPitch(-1); //Keep tipping
+    	}else if(timerChange <= 1000){
+    		control.withJump(true); //Dodge
+    		control.withPitch(-1); //Still keep tipping
+    		control.withYaw(steer); //Point the way we intend to go
+    	}
+    	return control;
+	}
     
 }
