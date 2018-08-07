@@ -12,6 +12,8 @@ import rlbot.obj.*;
 import rlbot.render.Renderer;
 
 public class BoostState extends State {
+	
+	//State which has Dui go collect boost when the ball is not too relevant to either net
 
 	public BoostState() {
 		super("Boost");

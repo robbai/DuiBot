@@ -114,7 +114,7 @@ public class Dui implements Bot {
         
         //Dealing with whether we should dodge
         boolean dodge; 
-        if(KickoffState.isKickoff(input)){
+        if(KickoffState.isKickoff(input.ball)){
         	dodge = (ballDistance < 1200 && car.boost < 20) || !car.hasWheelContact; //Dodge earlier in a kickoff than normal
         }else{
         	dodge = (((ballDistance > 3000 && car.velocity.magnitude() > 800) || (ballDistance < 600 && ballPosition3.z < 220)) && (Math.abs(steerBall) < 25 || ballDistance < 400) && car.position.z < 200) || !car.hasWheelContact;

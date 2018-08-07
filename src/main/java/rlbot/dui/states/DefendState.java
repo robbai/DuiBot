@@ -9,6 +9,8 @@ import rlbot.obj.*;
 import rlbot.render.Renderer;
 
 public class DefendState extends State {
+	
+	//State which has Dui sit close to its own net when the ball is closeby
 
 	public DefendState() {
 		super("Defend");

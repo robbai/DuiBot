@@ -10,6 +10,8 @@ import rlbot.obj.*;
 import rlbot.render.Renderer;
 
 public class AttackState extends State {
+	
+	//State which is the most active, makes Dui angle itself to face both the ball and the opponent's goal
 
 	public AttackState() {
 		super("Attack");
@@ -22,6 +24,7 @@ public class AttackState extends State {
             double enemyGoalDistance = carPosition.distance(enemyGoal);
         	this.setWeight(1.2 + (car.boost / 200D) + (enemyGoalDistance / 16000));
         	
+        	//If the ball and opponents goal are closely relevant, just drive to the ball
         	if(ballDistance < 800 && Dui.dif(steerEnemyGoal, steerBall) < 18){
         		return steerBall;
         	}
@@ -35,11 +38,8 @@ public class AttackState extends State {
         		x = -4000;
         	}
         	
-//        	System.out.println((ballPosition.x - x) + ", " + (ballPosition.y - y));
-        	
         	Vector2 target = new Vector2(x, y);
         	r.drawLine3d(Color.red, input.car.position.toFramework(), target.toFramework());
-//        	r.drawLine3d(Color.red, ballPosition3.flatten().toFramework(), enemyGoal.toFramework());
         	
         	return Math.toDegrees(carDirection.correctionAngle(target.minus(carPosition)));
         }else{
