@@ -17,13 +17,13 @@ public class KickoffState extends State {
 	private final int smoothness = 5;
 
 	public KickoffState() {
-		super("Kickoff");
+		super("Kickoff", Color.white);
 	}
 
 	@Override
 	public double getOutput(DataPacket input, Vector3 ballPosition3, Vector2 ballPosition, CarData car, Vector2 carPosition, Vector2 carDirection, Vector2 ownGoal, Vector2 enemyGoal, double ballDistance, double ownGoalDistance, double steerBall, double steerEnemyGoal, Renderer r){
 		if(isKickoff(input.ball)){
-	        r.drawLine3d(Color.white, car.position.toFramework(), input.ball.position.toFramework());
+	        r.drawLine3d(colour, car.position.toFramework(), input.ball.position.toFramework());
 			this.setWeight(1000);
 	    	return steerBall / smoothness;
 		}else{

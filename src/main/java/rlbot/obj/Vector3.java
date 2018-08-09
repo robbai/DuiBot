@@ -98,7 +98,7 @@ public class Vector3 {
     }
     
     public rlbot.obj.Vector3 clone(){
-        return new rlbot.obj.Vector3((float)this.x, (float)this.y, (float)this.z);
+        return new rlbot.obj.Vector3((float)this.x, (float)this.y, Math.max(0F, (float)this.z));
     }
     
 }

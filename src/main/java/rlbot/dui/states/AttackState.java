@@ -13,9 +13,12 @@ import rlbot.render.Renderer;
 public class AttackState extends State {
 	
 	//State which is the most active, makes Dui angle itself to face both the ball and the opponent's goal
+	
+	private static final int curves = 10;
+	private static final int xClamp = 3850;
 
 	public AttackState() {
-		super("Attack");
+		super("Attack", Color.red);
 	}
 
 	@Override
@@ -25,14 +28,12 @@ public class AttackState extends State {
             double enemyGoalDistance = carPosition.distance(enemyGoal);
         	this.setWeight(1.2 + (car.boost / 200D) + (enemyGoalDistance / 16000));
         	
-        	//If the ball and opponents goal are closely relevant, just drive to the ball
-        	if(ballDistance < 800 && Dui.dif(steerEnemyGoal, steerBall) < 8){
-        		return steerBall;
-        	}
-        	
-//        	double y = Dui.dif(steerEnemyGoal, steerBall) * 1.9 * (car.team == 0 ? -1 : 1) * Math.min(3, ballDistance / 350) / 2 + ballPosition.y;
-        	
-        	Vector2 target = target(input, carPosition, enemyGoal, r, 10);        	
+//        	//If the ball and opponents goal are closely relevant, just drive to the ball
+//        	if(ballDistance < 800 && Dui.dif(steerEnemyGoal, steerBall) < 8){
+//        		return steerBall;
+//        	}
+        	        	
+        	Vector2 target = target(input, carPosition, enemyGoal, r, curves);        	
         	return Math.toDegrees(carDirection.correctionAngle(target.minus(carPosition)));
         }else{
         	this.setWeight(0);
@@ -40,20 +41,22 @@ public class AttackState extends State {
         }
 	}
 
+	/**This method is mainly for drawing a curved line of attack towards the ball*/
 	private Vector2 target(DataPacket input, Vector2 start, Vector2 enemyGoal, Renderer r, int depth){
 		if(depth <= 0){
-			r.drawLine3d(Color.red, start.toFramework(), enemyGoal.toFramework());
+			r.drawLine3d(colour, start.toFramework(), enemyGoal.toFramework());
 			return null;
 		}
 		
-		double y = (start.y * 2 + input.ball.position.y) / 3;
+//    	double y = Dui.dif(steerEnemyGoal, steerBall) * 1.9 * (car.team == 0 ? -1 : 1) * Math.min(3, ballDistance / 350) / 2 + ballPosition.y;
+		double y = (start.y * 2.5 + input.ball.position.y) / 3.5D;
 		
     	double x = (input.ball.position.x) * Dui.dif(enemyGoal.y, start.y) / Dui.dif(enemyGoal.y, input.ball.position.y);    	
-    	x = Math.max(-4120, Math.min(4120, x)); //Clamp
+    	x = Math.max(-xClamp, Math.min(xClamp, x)); //Clamp
     	
     	Vector2 target = new Vector2(x, y);
-    	Vector2 halfTarget = start.plus(target.minus(start).scaled(0.25));
-    	r.drawLine3d(Color.red, start.toFramework(), halfTarget.toFramework());
+    	Vector2 halfTarget = start.plus(target.minus(start).scaled(0.25D));
+    	r.drawLine3d(colour, start.toFramework(), halfTarget.toFramework());
     	
     	target(input, halfTarget, enemyGoal, r, depth - 1);
     	return halfTarget;

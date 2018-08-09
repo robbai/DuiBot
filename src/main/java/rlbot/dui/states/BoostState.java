@@ -16,7 +16,7 @@ public class BoostState extends State {
 	//State which has Dui go collect boost when the ball is not too relevant to either net
 
 	public BoostState() {
-		super("Boost");
+		super("Boost", Color.blue);
 	}
 
 	@Override
@@ -27,7 +27,7 @@ public class BoostState extends State {
         	double boostDistance = carPosition.distance(boostLocation);
         	double angle = Math.toDegrees(carDirection.correctionAngle(boostLocation.minus(carPosition)));
         	if((Math.abs(angle) < 10 && boostDistance * 1.2 < ballDistance) || (ballDistance > 4000 && Math.abs(carPosition.y) < 4950 && ballPosition.distance(ownGoal) > Math.max(1200, carPosition.distance(ownGoal)) && Math.abs(ballPosition.y) > 100)){
-        		r.drawLine3d(Color.blue, car.position.toFramework(), boostLocation.toFramework());
+        		r.drawLine3d(colour, car.position.toFramework(), boostLocation.toFramework());
 	            this.setWeight(Math.pow((100 - car.boost) / 100D, 2) * (b.isFullBoost() ? Math.max(50, Math.abs(Dui.dif(steerBall, angle))) : 0.8));
 		        return angle;            
         	}else{

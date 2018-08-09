@@ -9,22 +9,22 @@ import rlbot.obj.Vector2;
 import rlbot.obj.Vector3;
 import rlbot.render.Renderer;
 
-public class Wait extends State {
+public class WaitState extends State {
 	
 	//Waits under the position of the ball when it gets high
 
-	public Wait() {
-		super("Wait");
+	public WaitState() {
+		super("Wait", Color.yellow);
 	}
 
 	@Override
 	public double getOutput(DataPacket input, Vector3 ballPosition3, Vector2 ballPosition, CarData car, Vector2 carPosition, Vector2 carDirection, Vector2 ownGoal, Vector2 enemyGoal, double ballDistance, double ownGoalDistance, double steerBall, double steerEnemyGoal, Renderer r){
-		final int fps = 10;
+		final int fps = 15;
 		Vector3 vel = input.ball.velocity.scaled(1D / (double)fps);
 		
 		if(!vel.isZero() && (ballPosition3.z > 500 || Math.abs(input.ball.velocity.z) > 800)){
 			Vector3 last = ballPosition3.clone();
-			for(int i = 0; i < 10 * fps; i++){
+			for(int i = 0; i < 8 * fps; i++){
 				
 				vel.z -= Math.min(650D / (double)fps, last.z);
 				if(last.z > 64){
@@ -46,11 +46,11 @@ public class Wait extends State {
 				}
 				
 				Vector3 latest = last.clone().plus(vel);
-				r.drawLine3d(Color.yellow, last.toFramework(), latest.toFramework());
+				r.drawLine3d(colour, last.toFramework(), latest.toFramework());
 				last = latest;
 			}
 			
-			this.setWeight(4000 / (1 + Math.abs(ballPosition3.x)) * 0.01D);
+			this.setWeight(4000 / (1 + Math.abs(ballPosition3.x)) * 0.1D);
 			return Math.toDegrees(carDirection.correctionAngle(last.flatten().minus(carPosition)));			
 		}
 		
