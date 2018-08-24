@@ -24,7 +24,7 @@ public class CentraliseState extends State {
 			
 			//Define a destination based on whether this is our goal or the opponent's
 			boolean attacking = ((car.team == 0 ? 1 : -1) * ballPosition.y > 0);
-			Vector2 dest = new Vector2(carPosition.x / 2, (car.team == 0 ? -1 : 1) * (attacking ? 3100 : -5075));
+			Vector2 dest = new Vector2(carPosition.x / 2, (car.team == 0 ? 1 : -1) * (attacking ? 3200 : -5075));
 			
 			this.setWeight(10); //Important!
 			r.drawLine3d(colour, carPosition.toFramework(), dest.toFramework());

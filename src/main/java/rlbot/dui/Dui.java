@@ -1,5 +1,6 @@
 package rlbot.dui;
 
+import java.awt.Color;
 import java.util.ArrayList;
 
 import rlbot.Bot;
@@ -29,7 +30,7 @@ public class Dui implements Bot {
     private int playerIndex;
 
 	/**The threshold at which the car should make smoother turns in degrees, degree turns below this will not be jerky*/
-	private final int steerThreshold = 20;
+	private final int steerThreshold = 16;
 
 	/**The list of states for Dui to work with*/
     public static ArrayList<State> states = new ArrayList<State>();
@@ -92,56 +93,72 @@ public class Dui implements Bot {
         Renderer r = BotLoopRenderer.forBotLoop(this);
 //      r.drawString3d(r(ballPosition3.z) + "", Color.white, ballPosition3.toFramework(), 2, 2);
         
-        //Prediction test
+        //Prediction updating
         DuiPrediction.update(input.ball, r);
+        
+        final long timerChange = System.currentTimeMillis() - dodgeTimer;
 
-        //Go through each state to calculate its output and weight, and to determine the total weight and greatest weight
-        for(byte i = 0; i < states.size(); i++){
-        	State s = states.get(i);
-        	angles[i] = s.getOutput(input, ballPosition3, ballPosition, car, carPosition, carDirection, ballDistance, ownGoalDistance, steerBall, steerEnemyGoal, r);
-        	if(s.getWeight() > 0) totalWeight += s.getWeight(); //Negative weights should be ignored
-        	greatestWeight = Math.max(greatestWeight, s.getWeight());
+        if(timerChange > 1250 || timerChange < 200 || WallState.isOnWall(car)){
+	        //Go through each state to calculate its output and weight, and to determine the total weight and greatest weight
+	        for(byte i = 0; i < states.size(); i++){
+	        	State s = states.get(i);
+	        	angles[i] = s.getOutput(input, ballPosition3, ballPosition, car, carPosition, carDirection, ballDistance, ownGoalDistance, steerBall, steerEnemyGoal, r);
+	        	if(s.getWeight() > 0) totalWeight += s.getWeight(); //Negative weights should be ignored
+	        	greatestWeight = Math.max(greatestWeight, s.getWeight());
+	        }
+	        
+	        //Go through all the states again in order to determine which way Dui should steer
+	        for(byte i = 0; i < states.size(); i++){
+	        	State s = states.get(i);
+	        	if(r(s.getWeight() / greatestWeight) >= 0.01){ //Negative/negligible weights should be ignored
+	        		chosen += (angles[i] * ((s.getWeight() / greatestWeight) / (totalWeight / greatestWeight)));
+	        		System.out.print(s.toString(greatestWeight) + ", "); //Print useful weighted outputs
+	        	}
+	        }      
+        }else{
+        	System.out.print("Dodging = ");
         }
-        
-        //Go through all the states again in order to determine which way Dui should steer
-        for(byte i = 0; i < states.size(); i++){
-        	State s = states.get(i);
-        	if(r(s.getWeight()) >= 0.01){ //Negative/negligible weights should be ignored
-        		chosen += (angles[i] * ((s.getWeight() / greatestWeight) / (totalWeight / greatestWeight)));
-        		System.out.print(s.toString(greatestWeight) + ", "); //Print useful weighted outputs
-        	}
-        }
-        
-        final boolean kickoff = KickoffState.isKickoff(input.ball);
         
         //Steering output, determined by what the weights have given us
         final float steer = ((chosen > 0 ? -1 : 1)) * (float)Math.min((1D / steerThreshold) * Math.abs(chosen), 1D);
         
+        final boolean kickoff = KickoffState.isKickoff(input.ball);
+        
+        //Speed for Dui to travel at
+        float throttle = ballDistance > 400 || WallState.isOnWall(car) ? 1 : Math.max(0F, (float)(1F - Math.max(ballPosition3.z - 94, input.ball.velocity.z / 3) / 90F));
+        throttle *= throttle;
+        
         //Controller to send at the end
-        ControlsOutput control = new ControlsOutput().withSteer(steer).withThrottle(ballDistance > 600 || WallState.isOnWall(car) ? 1 : Math.max(0F, (float)(1F - (ballPosition3.z - 94) / 120F))).withSlide(Math.abs(chosen) > 94 && car.position.z < 80);
+        ControlsOutput control = new ControlsOutput().withSteer(steer).withThrottle(throttle).withSlide(Math.abs(chosen) > 94 && car.position.z < 80);
         
         //Boosting is determined by how little we are turning, whether are are on the ground, and whether we are wanting to go fast
-        boolean boost = kickoff || (Math.abs(steer) < 0.1 && car.hasWheelContact && control.getThrottle() > 0.7 && (!car.isSupersonic || dif(steerBall, steerEnemyGoal) < 20) && (System.currentTimeMillis() - dodgeTimer) > 2400);
+        boolean boost = kickoff || (Math.abs(steer) < 0.1 && car.hasWheelContact && control.getThrottle() > 0.85 && (!car.isSupersonic || dif(steerBall, steerEnemyGoal) < 36 || ballDistance > 2500) && timerChange > 2000);
         control = control.withBoost(boost);
         if(boost) System.out.print("Zoom & ");
-        
+
         //Dealing with whether we should dodge
         boolean dodge; 
         if(kickoff){
         	dodge = ballDistance < 1800; //Dodge earlier in a kickoff than normal
         }else{
 //        	dodge = (((ballDistance > 3000 && car.velocity.magnitude() > 600) || (ballDistance < 350 && ballPosition3.z < 220) && Math.min(Math.abs(steerBall), Math.abs(steer)) < 18) && car.position.z < 140);
-        	dodge = (Math.abs(steer) < 0.1 && car.boost < 40 && ballDistance > 4000 && car.position.z < 60 && car.velocity.magnitude() > 1000) || (ballDistance < 420 && Math.abs(ballPosition3.z) < 130 && dif(steerBall, steerEnemyGoal) < 30);
+        	dodge = (Math.abs(steer) < 0.1 && car.boost < 40 && ballDistance > 4000 && car.position.z < 60 && car.velocity.magnitude() > 1000) || (ballDistance < 480 && Math.abs(ballPosition3.z) < 130 && dif(steerBall, steerEnemyGoal) < 30);
         }
-
         System.out.print(dodge ? "Dodge" : "Go");
 
         //Dealing with the actual process of dodging (where we are in the action of dodging)
-        if(dodge || (System.currentTimeMillis() - dodgeTimer) < 1100){
-        	control = dodge(control, (float)(ballDistance > 1600 ? chosen : steerBall));
+        if(dodge || (System.currentTimeMillis() - dodgeTimer) <= 1000){
+        	control = dodge(control, (float)(ballDistance > 1600 ? chosen : steerBall), timerChange);
+        }
+        
+        if(!car.hasWheelContact && (car.position.z > 240 || car.velocity.z > 900 || car.velocity.z < -250)){
+        	r.drawString3d("Correcting...", Color.gray, car.position.toFramework(), 2, 2);
+        	control = control.withYaw((float)((car.orientation.getYaw() > 0 ? -1 : 1) * car.orientation.getYaw() / 5F));
+        	control = control.withRoll((float)((car.orientation.getRoll() > 0 ? -1 : 1) * car.orientation.getRoll() / 5F));
+        	control = control.withPitch((float)((car.orientation.getPitch() > 0 ? -1 : 1) * car.orientation.getPitch() / 5F));
         }
 
-        System.out.println(); //End the line we printed
+        System.out.println(); //End the line we've been printing to
         return control;
     }
 
@@ -172,9 +189,9 @@ public class Dui implements Bot {
     	return Math.max(one, two) - Math.min(one, two);
     }
 
-    /**Return controls for dodging purposes*/
-	private ControlsOutput dodge(ControlsOutput control, float steer){
-		final long timerChange = System.currentTimeMillis() - dodgeTimer;
+    /**Return controls for dodging purposes
+     * @param timerChange */
+	private ControlsOutput dodge(ControlsOutput control, float steer, long timerChange){
 		float angle = (steer / 90F);
     	if(timerChange > 2200){
     		dodgeTimer = System.currentTimeMillis(); //We can now dodge again (recharged)

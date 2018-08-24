@@ -30,16 +30,16 @@ public class AttackState extends State {
         	this.setWeight(1.2 + (car.boost / 200D) + (enemyGoalDistance / 16000));
         	        
         	//Predict where the ball will be when we get there
-        	Vector3 ballPredict = DuiPrediction.ballAfterSeconds((double)ballDistance / (double)Math.min(2300, 610 + car.velocity.magnitude()));
+        	Vector3 ballPredict = DuiPrediction.ballAfterSeconds((double)ballDistance / (double)Math.min(2250, 400 + car.velocity.magnitude()));
         	
         	//Get an appropriate target for where Dui is shooting, rather than the centre of the goal
-        	Vector2 enemyGoal = new Vector2(Math.max(-800, Math.min(800, ballPredict.x)), Dui.enemyGoal.y);
+        	Vector2 enemyGoal = new Vector2(Math.max(-780, Math.min(780, ballPredict.x)), Dui.enemyGoal.y);
         	r.drawCenteredRectangle3d(Color.ORANGE, enemyGoal.toFramework(), 30, 30, false);
         	
         	//We add a slight offset to the ball to ensure we hit it at the right face
         	//Useful when we don't start with the best angle 
         	r.drawCenteredRectangle3d(this.colour, ballPredict.flatten().toFramework(), 30, 30, false);
-        	ballPredict = ballPredict.minus(enemyGoal.minus(ballPredict.flatten()).normalized().scaled(40));        	
+        	ballPredict = ballPredict.minus(enemyGoal.minus(ballPredict.flatten()).normalized().scaled(50));        	
         	r.drawCenteredRectangle3d(this.colour, ballPredict.flatten().toFramework(), 20, 20, false);
         	
         	Vector2 target = target(input, carPosition, enemyGoal, r, curves, ballPredict, car);        	
@@ -60,8 +60,8 @@ public class AttackState extends State {
     	
     	Vector2 target = new Vector2(x, y);
     	
-    	double scale = 0.35;
-    	if(Math.abs(x) == xClamp) scale += 0.1;
+    	double scale = 0.38;
+    	if(Math.abs(x) == xClamp) scale += 0.2;
     	Vector2 halfTarget = start.plus(target.minus(start).scaled(scale));
     	
     	//Here we connect the points of our pathway to create a curved line

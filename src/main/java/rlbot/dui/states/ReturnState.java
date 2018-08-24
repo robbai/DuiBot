@@ -38,7 +38,7 @@ public class ReturnState extends State {
                 r.drawLine3d(colour, car.position.toFramework(), Dui.ownGoal.toFramework());
         	}
         	
-        	this.setWeight(2 + (ownGoalDistance / 2500) * 10);
+        	this.setWeight(2 + (ownGoalDistance / 2500) * 5);
         	return angle;
         }else{
         	this.setWeight(0);
