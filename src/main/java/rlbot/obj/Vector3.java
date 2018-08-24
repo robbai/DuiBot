@@ -24,9 +24,17 @@ public class Vector3 {
     public Vector3 plus(Vector3 other) {
         return new Vector3(x + other.x, y + other.y, z + other.z);
     }
+    
+    public Vector3 plus(Vector2 other) {
+        return new Vector3(x + other.x, y + other.y, z);
+    }
 
     public Vector3 minus(Vector3 other) {
         return new Vector3(x - other.x, y - other.y, z - other.z);
+    }
+    
+    public Vector3 minus(Vector2 other) {
+        return new Vector3(x - other.x, y - other.y, z);
     }
 
     public Vector3 scaled(double scale) {
@@ -99,6 +107,10 @@ public class Vector3 {
     
     public rlbot.obj.Vector3 clone(){
         return new rlbot.obj.Vector3((float)this.x, (float)this.y, Math.max(0F, (float)this.z));
+    }
+    
+    public Vector3 confine(){
+    	return new Vector3(Math.max(-4096, Math.min(4096, x)), Math.max(-5120, Math.min(5120, y)), Math.max(0, Math.min(2044, z)));
     }
     
 }

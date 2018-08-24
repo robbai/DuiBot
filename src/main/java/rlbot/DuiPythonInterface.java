@@ -4,13 +4,14 @@ import rlbot.dui.Dui;
 import rlbot.manager.BotManager;
 import rlbot.pyinterop.DefaultPythonInterface;
 
-public class SamplePythonInterface extends DefaultPythonInterface {
+public class DuiPythonInterface extends DefaultPythonInterface {
 
-    public SamplePythonInterface(BotManager botManager) {
+    public DuiPythonInterface(BotManager botManager){
         super(botManager);
     }
 
-    protected Bot initBot(int index, String botType, int team) {
+    protected Bot initBot(int index, String botType, int team){
         return new Dui(index);
     }
+    
 }

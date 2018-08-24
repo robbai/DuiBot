@@ -34,7 +34,7 @@ public abstract class State {
 		this.weight = weight;
 	}
 	
-	public abstract double getOutput(DataPacket input, Vector3 ballPosition3, Vector2 ballPosition, CarData car, Vector2 carPosition, Vector2 carDirection, Vector2 ownGoal, Vector2 enemyGoal, double ballDistance, double ownGoalDistance, double steerBall, double steerEnemyGoal, Renderer r); 
+	public abstract double getOutput(DataPacket input, Vector3 ballPosition3, Vector2 ballPosition, CarData car, Vector2 carPosition, Vector2 carDirection, double ballDistance, double ownGoalDistance, double steerBall, double steerEnemyGoal, Renderer r); 
 
 	public String toString(final double divisor) {
 		return name + " [" + Dui.r(getWeight() / divisor) + "]";

@@ -21,9 +21,9 @@ public class KickoffState extends State {
 	}
 
 	@Override
-	public double getOutput(DataPacket input, Vector3 ballPosition3, Vector2 ballPosition, CarData car, Vector2 carPosition, Vector2 carDirection, Vector2 ownGoal, Vector2 enemyGoal, double ballDistance, double ownGoalDistance, double steerBall, double steerEnemyGoal, Renderer r){
+	public double getOutput(DataPacket input, Vector3 ballPosition3, Vector2 ballPosition, CarData car, Vector2 carPosition, Vector2 carDirection, double ballDistance, double ownGoalDistance, double steerBall, double steerEnemyGoal, Renderer r){
 		if(isKickoff(input.ball)){
-	        r.drawLine3d(colour, car.position.toFramework(), input.ball.position.toFramework());
+	        r.drawLine3d(colour, carPosition.toFramework(), ballPosition.toFramework());
 			this.setWeight(1000);
 	    	return steerBall / smoothness;
 		}else{

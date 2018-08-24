@@ -18,13 +18,13 @@ public class ReturnState extends State {
 	}
 
 	@Override
-	public double getOutput(DataPacket input, Vector3 ballPosition3, Vector2 ballPosition, CarData car, Vector2 carPosition, Vector2 carDirection, Vector2 ownGoal, Vector2 enemyGoal, double ballDistance, double ownGoalDistance, double steerBall, double steerEnemyGoal, Renderer r){		
+	public double getOutput(DataPacket input, Vector3 ballPosition3, Vector2 ballPosition, CarData car, Vector2 carPosition, Vector2 carDirection, double ballDistance, double ownGoalDistance, double steerBall, double steerEnemyGoal, Renderer r){		
 		if(ownGoalDistance > 800 && Dui.dif(steerBall, steerEnemyGoal) >= 90){
 			
-        	double angle = Math.toDegrees(carDirection.correctionAngle(ownGoal.minus(carPosition)));
+        	double angle = Math.toDegrees(carDirection.correctionAngle(Dui.ownGoal.minus(carPosition)));
 			
-			if(ballPosition.distance(enemyGoal) < 2000){
-	            r.drawLine3d(colour, car.position.toFramework(), ownGoal.toFramework());
+			if(ballPosition.distance(Dui.enemyGoal) < 2000){
+	            r.drawLine3d(colour, car.position.toFramework(), Dui.ownGoal.toFramework());
 				this.setWeight(0.4);
 	        	return angle;
 			}
@@ -35,10 +35,10 @@ public class ReturnState extends State {
         		angle = Math.toDegrees(carDirection.correctionAngle(target.minus(carPosition)));
                 r.drawLine3d(colour, car.position.toFramework(), target.toFramework());
         	}else{
-                r.drawLine3d(colour, car.position.toFramework(), ownGoal.toFramework());
+                r.drawLine3d(colour, car.position.toFramework(), Dui.ownGoal.toFramework());
         	}
         	
-        	this.setWeight(0.6 + (ownGoalDistance / 2500) * 2);
+        	this.setWeight(2 + (ownGoalDistance / 2500) * 10);
         	return angle;
         }else{
         	this.setWeight(0);

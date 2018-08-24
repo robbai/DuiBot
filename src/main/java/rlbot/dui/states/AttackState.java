@@ -1,9 +1,11 @@
 
+
 package rlbot.dui.states;
 
 import java.awt.Color;
 
 import rlbot.dui.Dui;
+import rlbot.dui.DuiPrediction;
 import rlbot.dui.State;
 import rlbot.input.CarData;
 import rlbot.input.DataPacket;
@@ -14,7 +16,7 @@ public class AttackState extends State {
 	
 	//State which is the most active, makes Dui angle itself to face both the ball and the opponent's goal
 	
-	private static final int curves = 10;
+	private static final int curves = 20;
 	private static final int xClamp = 3850;
 
 	public AttackState() {
@@ -22,18 +24,25 @@ public class AttackState extends State {
 	}
 
 	@Override
-	public double getOutput(DataPacket input, Vector3 ballPosition3, Vector2 ballPosition, CarData car, Vector2 carPosition, Vector2 carDirection, Vector2 ownGoal, Vector2 enemyGoal, double ballDistance, double ownGoalDistance, double steerBall, double steerEnemyGoal, Renderer r){
-		//  && ((car.team == 0 ? 1 : -1) * carPosition.y + 1000) < ((car.team == 0 ? 1 : -1) * ballPosition.y)
-		if(Math.abs(carPosition.y) <= 5120 && !KickoffState.isKickoff(input.ball)){
-            double enemyGoalDistance = carPosition.distance(enemyGoal);
+	public double getOutput(DataPacket input, Vector3 ballPosition3, Vector2 ballPosition, CarData car, Vector2 carPosition, Vector2 carDirection, double ballDistance, double ownGoalDistance, double steerBall, double steerEnemyGoal, Renderer r){
+		if(Math.abs(carPosition.y) <= 5120 && !CentraliseState.isBackboardRolling(input.ball)){
+            double enemyGoalDistance = carPosition.distance(Dui.enemyGoal);
         	this.setWeight(1.2 + (car.boost / 200D) + (enemyGoalDistance / 16000));
+        	        
+        	//Predict where the ball will be when we get there
+        	Vector3 ballPredict = DuiPrediction.ballAfterSeconds((double)ballDistance / (double)Math.min(2300, 610 + car.velocity.magnitude()));
         	
-//        	//If the ball and opponents goal are closely relevant, just drive to the ball
-//        	if(ballDistance < 800 && Dui.dif(steerEnemyGoal, steerBall) < 8){
-//        		return steerBall;
-//        	}
-        	        	
-        	Vector2 target = target(input, carPosition, enemyGoal, r, curves);        	
+        	//Get an appropriate target for where Dui is shooting, rather than the centre of the goal
+        	Vector2 enemyGoal = new Vector2(Math.max(-800, Math.min(800, ballPredict.x)), Dui.enemyGoal.y);
+        	r.drawCenteredRectangle3d(Color.ORANGE, enemyGoal.toFramework(), 30, 30, false);
+        	
+        	//We add a slight offset to the ball to ensure we hit it at the right face
+        	//Useful when we don't start with the best angle 
+        	r.drawCenteredRectangle3d(this.colour, ballPredict.flatten().toFramework(), 30, 30, false);
+        	ballPredict = ballPredict.minus(enemyGoal.minus(ballPredict.flatten()).normalized().scaled(40));        	
+        	r.drawCenteredRectangle3d(this.colour, ballPredict.flatten().toFramework(), 20, 20, false);
+        	
+        	Vector2 target = target(input, carPosition, enemyGoal, r, curves, ballPredict, car);        	
         	return Math.toDegrees(carDirection.correctionAngle(target.minus(carPosition)));
         }else{
         	this.setWeight(0);
@@ -41,24 +50,25 @@ public class AttackState extends State {
         }
 	}
 
-	/**This method is mainly for drawing a curved line of attack towards the ball*/
-	private Vector2 target(DataPacket input, Vector2 start, Vector2 enemyGoal, Renderer r, int depth){
-		if(depth <= 0){
-			r.drawLine3d(colour, start.toFramework(), enemyGoal.toFramework());
-			return null;
-		}
+	/**This method is used for creating a curved line of attack towards the ball*/
+	private Vector2 target(DataPacket input, Vector2 start, Vector2 enemyGoal, Renderer r, int depth, Vector3 ball, CarData car){
+		if(depth == 0) return null;
 		
-//    	double y = Dui.dif(steerEnemyGoal, steerBall) * 1.9 * (car.team == 0 ? -1 : 1) * Math.min(3, ballDistance / 350) / 2 + ballPosition.y;
-		double y = (start.y * 2.5 + input.ball.position.y) / 3.5D;
-		
-    	double x = (input.ball.position.x) * Dui.dif(enemyGoal.y, start.y) / Dui.dif(enemyGoal.y, input.ball.position.y);    	
+		double y = ((ball.y + Math.abs(start.y - ball.y) * (car.team == 0 ? -1 : 1)) * 1.7D + ball.y) / 2.7D;
+    	double x = enemyGoal.x + ((ball.x - enemyGoal.x) * Dui.dif(enemyGoal.y, start.y) / Dui.dif(enemyGoal.y, ball.y));    	
     	x = Math.max(-xClamp, Math.min(xClamp, x)); //Clamp
     	
     	Vector2 target = new Vector2(x, y);
-    	Vector2 halfTarget = start.plus(target.minus(start).scaled(0.25D));
-    	r.drawLine3d(colour, start.toFramework(), halfTarget.toFramework());
     	
-    	target(input, halfTarget, enemyGoal, r, depth - 1);
+    	double scale = 0.35;
+    	if(Math.abs(x) == xClamp) scale += 0.1;
+    	Vector2 halfTarget = start.plus(target.minus(start).scaled(scale));
+    	
+    	//Here we connect the points of our pathway to create a curved line
+    	//The final orange line shows where Dui will predict the ball to go when hit from this path
+    	r.drawLine3d((depth == 1 ? Color.ORANGE : colour), start.toFramework(), (depth == 1 ? start.plus(target.minus(start).scaled(10000)).confine().toFramework() : halfTarget.toFramework()));
+    	
+    	target(input, halfTarget, enemyGoal, r, depth - 1, ball, car);
     	return halfTarget;
 	}
 

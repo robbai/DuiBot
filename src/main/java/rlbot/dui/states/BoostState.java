@@ -20,15 +20,15 @@ public class BoostState extends State {
 	}
 
 	@Override
-	public double getOutput(DataPacket input, Vector3 ballPosition3, Vector2 ballPosition, CarData car, Vector2 carPosition, Vector2 carDirection, Vector2 ownGoal, Vector2 enemyGoal, double ballDistance, double ownGoalDistance, double steerBall, double steerEnemyGoal, Renderer r){ 		
+	public double getOutput(DataPacket input, Vector3 ballPosition3, Vector2 ballPosition, CarData car, Vector2 carPosition, Vector2 carDirection, double ballDistance, double ownGoalDistance, double steerBall, double steerEnemyGoal, Renderer r){ 		
 		BoostPad b = getNearestBoostpad(carPosition);
         if(b != null){
         	Vector2 boostLocation = b.getLocation().flatten();
         	double boostDistance = carPosition.distance(boostLocation);
         	double angle = Math.toDegrees(carDirection.correctionAngle(boostLocation.minus(carPosition)));
-        	if((Math.abs(angle) < 10 && boostDistance * 1.2 < ballDistance) || (ballDistance > 4000 && Math.abs(carPosition.y) < 4950 && ballPosition.distance(ownGoal) > Math.max(1200, carPosition.distance(ownGoal)) && Math.abs(ballPosition.y) > 100)){
+        	if((Math.abs(angle) < 15 && boostDistance < ballDistance) || (ballDistance > 4000 && Math.abs(carPosition.y) < 5120 && ballPosition.distance(Dui.ownGoal) > Math.max(1300, carPosition.distance(Dui.ownGoal)) && Math.abs(ballPosition.y) > 100)){
         		r.drawLine3d(colour, car.position.toFramework(), boostLocation.toFramework());
-	            this.setWeight(Math.pow((100 - car.boost) / 100D, 2) * (b.isFullBoost() ? Math.max(50, Math.abs(Dui.dif(steerBall, angle))) : 0.8));
+	            this.setWeight(Math.pow((100 - car.boost) / 100D, 2) * (b.isFullBoost() ? Math.max(30, Math.abs(Dui.dif(steerBall, angle))) : 1));
 		        return angle;            
         	}else{
         		this.setWeight(0);

@@ -89,4 +89,8 @@ public class Vector2 {
         return new rlbot.vector.Vector3(-(float)this.x, (float)this.y, 0);
     }
     
+    public Vector2 confine(){
+    	return new Vector2(Math.max(-4096, Math.min(4096, x)), Math.max(-5120, Math.min(5120, y)));
+    }
+    
 }
