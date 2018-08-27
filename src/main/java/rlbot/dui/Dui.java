@@ -30,7 +30,7 @@ public class Dui implements Bot {
     private int playerIndex;
 
 	/**The threshold at which the car should make smoother turns in degrees, degree turns below this will not be jerky*/
-	private final int steerThreshold = 16;
+	private final int steerThreshold = 15;
 
 	/**The list of states for Dui to work with*/
     public static ArrayList<State> states = new ArrayList<State>();
@@ -39,7 +39,7 @@ public class Dui implements Bot {
     private long dodgeTimer = 0L;
 
     /**Team index of the current car*/
-    private int team = -10;
+    public static int team = -10;
 
     /**Dui's home*/public static Vector2 ownGoal;
     /**Dui's target*/public static Vector2 enemyGoal;
@@ -91,10 +91,15 @@ public class Dui implements Bot {
         
         //Get a renderer to show graphics for Dui
         Renderer r = BotLoopRenderer.forBotLoop(this);
-//      r.drawString3d(r(ballPosition3.z) + "", Color.white, ballPosition3.toFramework(), 2, 2);
+        r.drawString3d(r(input.ball.velocity.magnitude()) + "", Color.white, ballPosition3.toFramework(), 2, 2);
         
         //Prediction updating
         DuiPrediction.update(input.ball, r);
+        if(DuiPrediction.isDanger()){
+        	r.drawString3d("!", Color.red, car.position.plus(new Vector3(0, 0, 150)).toFramework(), 4, 4);
+        }else if(DuiPrediction.isNice()){
+        	r.drawString3d(":)", Color.green, car.position.plus(new Vector3(0, 0, 150)).toFramework(), 4, 4);
+        }
         
         final long timerChange = System.currentTimeMillis() - dodgeTimer;
 
@@ -132,7 +137,7 @@ public class Dui implements Bot {
         ControlsOutput control = new ControlsOutput().withSteer(steer).withThrottle(throttle).withSlide(Math.abs(chosen) > 94 && car.position.z < 80);
         
         //Boosting is determined by how little we are turning, whether are are on the ground, and whether we are wanting to go fast
-        boolean boost = kickoff || (Math.abs(steer) < 0.1 && car.hasWheelContact && control.getThrottle() > 0.85 && (!car.isSupersonic || dif(steerBall, steerEnemyGoal) < 36 || ballDistance > 2500) && timerChange > 2000);
+        boolean boost = kickoff || (Math.abs(steer) < 0.1 && car.hasWheelContact && control.getThrottle() > 0.96 && (!car.isSupersonic || dif(steerBall, steerEnemyGoal) < 10 || ballDistance > 2500) && timerChange > 2000);
         control = control.withBoost(boost);
         if(boost) System.out.print("Zoom & ");
 
@@ -142,7 +147,7 @@ public class Dui implements Bot {
         	dodge = ballDistance < 1800; //Dodge earlier in a kickoff than normal
         }else{
 //        	dodge = (((ballDistance > 3000 && car.velocity.magnitude() > 600) || (ballDistance < 350 && ballPosition3.z < 220) && Math.min(Math.abs(steerBall), Math.abs(steer)) < 18) && car.position.z < 140);
-        	dodge = (Math.abs(steer) < 0.1 && car.boost < 40 && ballDistance > 4000 && car.position.z < 60 && car.velocity.magnitude() > 1000) || (ballDistance < 480 && Math.abs(ballPosition3.z) < 130 && dif(steerBall, steerEnemyGoal) < 30);
+        	dodge = (Math.abs(steer) < 0.1 && car.boost < 40 && ballDistance > 4000 && car.position.z < 60 && car.velocity.magnitude() > 1000) || (ballDistance < 400 && Math.abs(ballPosition3.z) < 120 && dif(steerBall, steerEnemyGoal) < 26);
         }
         System.out.print(dodge ? "Dodge" : "Go");
 
@@ -153,9 +158,9 @@ public class Dui implements Bot {
         
         if(!car.hasWheelContact && (car.position.z > 240 || car.velocity.z > 900 || car.velocity.z < -250)){
         	r.drawString3d("Correcting...", Color.gray, car.position.toFramework(), 2, 2);
-        	control = control.withYaw((float)((car.orientation.getYaw() > 0 ? -1 : 1) * car.orientation.getYaw() / 5F));
-        	control = control.withRoll((float)((car.orientation.getRoll() > 0 ? -1 : 1) * car.orientation.getRoll() / 5F));
-        	control = control.withPitch((float)((car.orientation.getPitch() > 0 ? -1 : 1) * car.orientation.getPitch() / 5F));
+        	control = control.withYaw((float)(-car.orientation.getYaw() / 4F));
+        	control = control.withRoll((float)(-car.orientation.getRoll() / 4F));
+        	control = control.withPitch((float)(-car.orientation.getPitch() / 4F));
         }
 
         System.out.println(); //End the line we've been printing to

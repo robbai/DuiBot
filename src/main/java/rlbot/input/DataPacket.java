@@ -9,13 +9,11 @@ public class DataPacket {
     public final int team;
     public final int playerIndex;
 
-    public DataPacket(GameTickPacket request, int playerIndex) {
-
-        this.playerIndex = playerIndex;
+    public DataPacket(GameTickPacket request, int playerIndex){
         this.ball = new BallData(request.ball());
-
+        this.playerIndex = playerIndex;
         rlbot.flat.PlayerInfo myPlayerInfo = request.players(playerIndex);
-        this.team = myPlayerInfo.team();
         this.car = new CarData(myPlayerInfo, request.gameInfo().secondsElapsed());
+        this.team = myPlayerInfo.team();
     }
 }

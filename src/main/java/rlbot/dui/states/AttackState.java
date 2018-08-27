@@ -17,7 +17,8 @@ public class AttackState extends State {
 	//State which is the most active, makes Dui angle itself to face both the ball and the opponent's goal
 	
 	private static final int curves = 20;
-	private static final int xClamp = 3850;
+	private static final int xClamp = 3990; //3850
+	private static final double playerWeight = 1.7D;
 
 	public AttackState() {
 		super("Attack", Color.red);
@@ -39,7 +40,7 @@ public class AttackState extends State {
         	//We add a slight offset to the ball to ensure we hit it at the right face
         	//Useful when we don't start with the best angle 
         	r.drawCenteredRectangle3d(this.colour, ballPredict.flatten().toFramework(), 30, 30, false);
-        	ballPredict = ballPredict.minus(enemyGoal.minus(ballPredict.flatten()).normalized().scaled(50));        	
+        	ballPredict = ballPredict.minus(enemyGoal.minus(ballPredict.flatten()).normalized().scaled(36));        	
         	r.drawCenteredRectangle3d(this.colour, ballPredict.flatten().toFramework(), 20, 20, false);
         	
         	Vector2 target = target(input, carPosition, enemyGoal, r, curves, ballPredict, car);        	
@@ -54,14 +55,16 @@ public class AttackState extends State {
 	private Vector2 target(DataPacket input, Vector2 start, Vector2 enemyGoal, Renderer r, int depth, Vector3 ball, CarData car){
 		if(depth == 0) return null;
 		
-		double y = ((ball.y + Math.abs(start.y - ball.y) * (car.team == 0 ? -1 : 1)) * 1.7D + ball.y) / 2.7D;
-    	double x = enemyGoal.x + ((ball.x - enemyGoal.x) * Dui.dif(enemyGoal.y, start.y) / Dui.dif(enemyGoal.y, ball.y));    	
-    	x = Math.max(-xClamp, Math.min(xClamp, x)); //Clamp
+		double y = ((ball.y + Math.abs(start.y - ball.y) * (car.team == 0 ? -1 : 1)) * playerWeight + ball.y) / (1 + playerWeight);
+    	double x = enemyGoal.x + ((ball.x - enemyGoal.x) * Dui.dif(enemyGoal.y, start.y) / Dui.dif(enemyGoal.y, ball.y)); 
+    	
+    	int xClampNew = (int)(Math.abs(ball.x) > xClamp ? ball.x : xClamp);
+    	x = Math.max(-xClampNew, Math.min(xClampNew, x)); //Clamp
     	
     	Vector2 target = new Vector2(x, y);
     	
     	double scale = 0.38;
-    	if(Math.abs(x) == xClamp) scale += 0.2;
+    	if(Math.abs(x) >= xClamp) scale -= 0.1;
     	Vector2 halfTarget = start.plus(target.minus(start).scaled(scale));
     	
     	//Here we connect the points of our pathway to create a curved line

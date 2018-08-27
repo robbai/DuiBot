@@ -13,7 +13,13 @@ public class DuiPrediction {
 	private static int furthestCalculated = 0;
 	private static Vector3[] positions;
 	
+	private static boolean danger = false;
+	private static boolean nice = false;
+	
 	public static void update(BallData ball, Renderer r){
+		danger = false;
+		nice = false;
+		
 		positions = new Vector3[fps * maxSeconds];
 		positions[0] = ball.position.clone();
 		furthestCalculated = 0;
@@ -38,9 +44,16 @@ public class DuiPrediction {
 				vel.y = -vel.y;
 				positions[i - 1].y = Math.max(-5119, Math.min(5119, positions[i - 1].y));
 				render = false;
+				
+				if(Math.abs(positions[i - 1].x) < 800 && Math.abs(positions[i - 1].z) < 580){
+					danger = (positions[i - 1].y < 0 == (Dui.team == 0));
+					nice = (positions[i - 1].y > 0 == (Dui.team == 0));
+				}
+				
 			}
 			positions[i] = positions[i - 1].clone().plus(vel);
 			if(render) r.drawLine3d(Color.YELLOW, positions[i - 1].toFramework(), positions[i].toFramework());
+			if(danger || nice) break;
 		}
 	}
 	
@@ -48,6 +61,14 @@ public class DuiPrediction {
 		int frame = (int)(seconds * fps);
 		frame = Math.min(frame, Math.min(maxSeconds * fps, furthestCalculated));
 		return positions[frame];
+	}
+	
+	public static boolean isDanger() {
+		return danger;
+	}
+
+	public static boolean isNice() {
+		return nice;
 	}
 
 }

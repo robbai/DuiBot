@@ -23,8 +23,8 @@ public class CentraliseState extends State {
 		if(isBackboardRolling(input.ball)){
 			
 			//Define a destination based on whether this is our goal or the opponent's
-			boolean attacking = ((car.team == 0 ? 1 : -1) * ballPosition.y > 0);
-			Vector2 dest = new Vector2(carPosition.x / 2, (car.team == 0 ? 1 : -1) * (attacking ? 3200 : -5075));
+			final boolean attacking = ((car.team == 0 ? 1 : -1) * ballPosition.y > 0);
+			Vector2 dest = new Vector2(carPosition.x / 2, (car.team == 0 ? 1 : -1) * (attacking ? 3550 : -5075));
 			
 			this.setWeight(10); //Important!
 			r.drawLine3d(colour, carPosition.toFramework(), dest.toFramework());
@@ -44,13 +44,13 @@ public class CentraliseState extends State {
 		
 		//Ball must be moving towards the goal (somewhat fast)
 		if(ball.position.x > 0){
-			if(ball.velocity.x > -60) return false;
+			if(ball.velocity.x > -500) return false;
 		}else{
-			if(ball.velocity.x < 60) return false;
+			if(ball.velocity.x < 500) return false;
 		}
 		
 		//If it's falling fast, treat it normally
-		return ball.velocity.z > -200;
+		return ball.velocity.z > -230;
 	}
 
 }
