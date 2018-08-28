@@ -11,6 +11,9 @@ public class CarData {
     public final boolean isSupersonic;
     public final int team;
     public final float elapsedSeconds;
+    
+    /**Dui*/
+	public boolean dui = false;
 
     public CarData(rlbot.flat.PlayerInfo playerInfo, float elapsedSeconds) {
         this.position = Vector3.fromFlatbuffer(playerInfo.physics().location());
@@ -22,4 +25,10 @@ public class CarData {
         this.hasWheelContact = playerInfo.hasWheelContact();
         this.elapsedSeconds = elapsedSeconds;
     }
+
+	@Override
+	public String toString() {
+		return "Car [team=" + team + ", boost=" + (int)boost + ", grounded=" + hasWheelContact + ", supersonic=" + isSupersonic + "]";
+	}
+    
 }

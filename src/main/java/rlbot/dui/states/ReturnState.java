@@ -19,21 +19,22 @@ public class ReturnState extends State {
 	}
 
 	@Override
-	public double getOutput(DataPacket input, Vector3 ballPosition3, Vector2 ballPosition, CarData car, Vector2 carPosition, Vector2 carDirection, double ballDistance, double ownGoalDistance, double steerBall, double steerEnemyGoal, Renderer r){		
-		if(!DuiPrediction.isNice() && (DuiPrediction.isDanger() || (ownGoalDistance > 800 && Dui.dif(steerBall, steerEnemyGoal) >= 90))){
+	public double getOutput(DataPacket input, Vector3 ballPosition3, Vector2 ballPosition, CarData car, Vector2 carPosition, Vector2 carDirection, double ballDistance, double ownGoalDistance, double steerBall, double steerEnemyGoal, Renderer r){
+		final boolean danger = DuiPrediction.isDanger();
+		if(!DuiPrediction.isNice() && (danger || (ownGoalDistance > 800 && Dui.dif(steerBall, steerEnemyGoal) >= 102))){
 			
         	double angle = Math.toDegrees(carDirection.correctionAngle(Dui.ownGoal.minus(carPosition)));
 			
         	//Return back to our own goal
-			if(ballPosition.distance(Dui.enemyGoal) < 2000){
+			if(!danger && ballPosition.distance(Dui.enemyGoal) < 2000){
 	            r.drawLine3d(colour, car.position.toFramework(), Dui.ownGoal.toFramework());
 				this.setWeight(0.4);
 	        	return angle;
 			}
 			
 			//Choose to intercept the ball or just return back
-        	if(Dui.dif(angle, steerBall) <= 65 || ballPosition.x < 1100){
-        		double modifier = Math.max(50, ballDistance / 3.5);
+        	if(Dui.dif(angle, steerBall) <= 65 || ballPosition.x < 1100 || danger){
+        		final double modifier = Math.max(50, ballDistance / 2.8D);
         		Vector2 target = new Vector2(ballPosition.x > carPosition.x ? ballPosition.x - modifier : ballPosition.x + modifier, ballPosition.y);
         		angle = Math.toDegrees(carDirection.correctionAngle(target.minus(carPosition)));
                 r.drawLine3d(colour, car.position.toFramework(), target.toFramework());

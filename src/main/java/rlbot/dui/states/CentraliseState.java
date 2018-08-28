@@ -40,13 +40,13 @@ public class CentraliseState extends State {
 	public static boolean isBackboardRolling(BallData ball){
 		//Ball must be near the back corners
 		if(Math.abs(ball.position.y) < 4800) return false;
-		if(Math.abs(ball.position.x) < 1000) return false;
+		if(Math.abs(ball.position.x) < 950) return false;
 		
 		//Ball must be moving towards the goal (somewhat fast)
 		if(ball.position.x > 0){
-			if(ball.velocity.x > -500) return false;
+			if(ball.velocity.x > -400) return false;
 		}else{
-			if(ball.velocity.x < 500) return false;
+			if(ball.velocity.x < 400) return false;
 		}
 		
 		//If it's falling fast, treat it normally

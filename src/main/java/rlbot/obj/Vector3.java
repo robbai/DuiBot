@@ -67,7 +67,7 @@ public class Vector3 {
         return x * x + y * y + z * z;
     }
 
-    public Vector3 normalized() {
+    public Vector3 normalised() {
 
         if (isZero()) {
             throw new IllegalStateException("Cannot normalize a vector with length zero!");

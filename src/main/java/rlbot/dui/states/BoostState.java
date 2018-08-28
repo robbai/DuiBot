@@ -5,6 +5,7 @@ import java.awt.Color;
 import rlbot.boost.BoostManager;
 import rlbot.boost.BoostPad;
 import rlbot.dui.Dui;
+import rlbot.dui.DuiPrediction;
 import rlbot.dui.State;
 import rlbot.input.CarData;
 import rlbot.input.DataPacket;
@@ -22,7 +23,7 @@ public class BoostState extends State {
 	@Override
 	public double getOutput(DataPacket input, Vector3 ballPosition3, Vector2 ballPosition, CarData car, Vector2 carPosition, Vector2 carDirection, double ballDistance, double ownGoalDistance, double steerBall, double steerEnemyGoal, Renderer r){ 		
 		BoostPad b = getNearestBoostpad(carPosition);
-        if(b != null){
+        if(b != null && !DuiPrediction.isDanger()){
         	Vector2 boostLocation = b.getLocation().flatten();
         	double boostDistance = carPosition.distance(boostLocation);
         	double angle = Math.toDegrees(carDirection.correctionAngle(boostLocation.minus(carPosition)));

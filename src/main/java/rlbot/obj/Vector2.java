@@ -47,7 +47,7 @@ public class Vector2 {
         return x * x + y * y;
     }
 
-    public Vector2 normalized(){
+    public Vector2 normalised(){
         if(isZero()){
             throw new IllegalStateException("Cannot normalize a vector with length zero!");
         }

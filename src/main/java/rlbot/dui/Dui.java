@@ -1,18 +1,13 @@
 package rlbot.dui;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.util.ArrayList;
 
 import rlbot.Bot;
 import rlbot.ControllerState;
 import rlbot.boost.BoostManager;
-import rlbot.dui.states.AttackState;
-import rlbot.dui.states.BoostState;
-import rlbot.dui.states.CentraliseState;
-import rlbot.dui.states.DefendState;
-import rlbot.dui.states.KickoffState;
-import rlbot.dui.states.ReturnState;
-import rlbot.dui.states.WallState;
+import rlbot.dui.states.*;
 import rlbot.flat.GameTickPacket;
 import rlbot.input.CarData;
 import rlbot.input.DataPacket;
@@ -30,7 +25,7 @@ public class Dui implements Bot {
     private int playerIndex;
 
 	/**The threshold at which the car should make smoother turns in degrees, degree turns below this will not be jerky*/
-	private final int steerThreshold = 15;
+	private final int steerThreshold = 14;
 
 	/**The list of states for Dui to work with*/
     public static ArrayList<State> states = new ArrayList<State>();
@@ -51,10 +46,11 @@ public class Dui implements Bot {
         new AttackState();
         new KickoffState();
         new BoostState();
-        new DefendState();
-        new ReturnState();
+//        new DefendState();
+//        new ReturnState();
         new WallState();
         new CentraliseState();
+        new TestState();
     }
 
     private ControlsOutput processInput(DataPacket input){
@@ -91,7 +87,17 @@ public class Dui implements Bot {
         
         //Get a renderer to show graphics for Dui
         Renderer r = BotLoopRenderer.forBotLoop(this);
-        r.drawString3d(r(input.ball.velocity.magnitude()) + "", Color.white, ballPosition3.toFramework(), 2, 2);
+//      r.drawString3d(r(input.ball.velocity.magnitude()) + "", Color.white, ballPosition3.toFramework(), 2, 2);
+        
+        r.drawString2d("Pitch: " + r(car.orientation.getPitch()), Color.gray, new Point(0, 0), 2, 2);
+        r.drawString2d("Roll: " + r(car.orientation.getRoll()), Color.gray, new Point(0, 25), 2, 2);
+        r.drawString2d("Yaw: " + r(car.orientation.getYaw()), Color.gray, new Point(0, 50), 2, 2);
+        
+//        System.out.print(input.cars.length + " Cars, ");
+//        for(CarData c : input.cars){
+//        	if(c == null || c.dui) continue;
+//        	r.drawCenteredRectangle3d((c.team == team ? Color.green : Color.red), c.position.toFramework(), 30, 30, false);
+//        }
         
         //Prediction updating
         DuiPrediction.update(input.ball, r);
@@ -130,35 +136,35 @@ public class Dui implements Bot {
         final boolean kickoff = KickoffState.isKickoff(input.ball);
         
         //Speed for Dui to travel at
-        float throttle = ballDistance > 400 || WallState.isOnWall(car) ? 1 : Math.max(0F, (float)(1F - Math.max(ballPosition3.z - 94, input.ball.velocity.z / 3) / 90F));
+        float throttle = ballDistance > 400 || WallState.isOnWall(car) ? 1 : Math.max(0F, (float)(1F - (ballPosition3.z - 94) / 90F));
         throttle *= throttle;
         
         //Controller to send at the end
-        ControlsOutput control = new ControlsOutput().withSteer(steer).withThrottle(throttle).withSlide(Math.abs(chosen) > 94 && car.position.z < 80);
+        ControlsOutput control = new ControlsOutput().withSteer(steer).withThrottle(throttle).withSlide(Math.abs(chosen) > 70 && car.position.z < 70);
         
         //Boosting is determined by how little we are turning, whether are are on the ground, and whether we are wanting to go fast
-        boolean boost = kickoff || (Math.abs(steer) < 0.1 && car.hasWheelContact && control.getThrottle() > 0.96 && (!car.isSupersonic || dif(steerBall, steerEnemyGoal) < 10 || ballDistance > 2500) && timerChange > 2000);
+        boolean boost = kickoff || (Math.abs(steer) < 0.1 && car.hasWheelContact && control.getThrottle() > 0.96 && (!car.isSupersonic || dif(steerBall, steerEnemyGoal) < 10 || ballDistance > 2500) && timerChange > 2000 && !WallState.isOnWall(car));
         control = control.withBoost(boost);
         if(boost) System.out.print("Zoom & ");
 
         //Dealing with whether we should dodge
         boolean dodge; 
         if(kickoff){
-        	dodge = ballDistance < 1800; //Dodge earlier in a kickoff than normal
+        	dodge = ballDistance < 1575; //Dodge earlier in a kickoff than normal
         }else{
 //        	dodge = (((ballDistance > 3000 && car.velocity.magnitude() > 600) || (ballDistance < 350 && ballPosition3.z < 220) && Math.min(Math.abs(steerBall), Math.abs(steer)) < 18) && car.position.z < 140);
-        	dodge = (Math.abs(steer) < 0.1 && car.boost < 40 && ballDistance > 4000 && car.position.z < 60 && car.velocity.magnitude() > 1000) || (ballDistance < 400 && Math.abs(ballPosition3.z) < 120 && dif(steerBall, steerEnemyGoal) < 26);
+        	dodge = (Math.abs(steer) < 0.1 && car.boost < 40 && ballDistance > 4000 && car.velocity.magnitude() > 700) || (ballDistance < 500 && Math.abs(ballPosition3.z) < 170 && (DuiPrediction.isDanger() || dif(steerBall, steerEnemyGoal) < 26));
         }
         System.out.print(dodge ? "Dodge" : "Go");
 
         //Dealing with the actual process of dodging (where we are in the action of dodging)
         if(dodge || (System.currentTimeMillis() - dodgeTimer) <= 1000){
-        	control = dodge(control, (float)(ballDistance > 1600 ? chosen : steerBall), timerChange);
+        	control = dodge(control, (float)(ballDistance > 1600 && !kickoff ? chosen : steerBall), timerChange);
         }
         
         if(!car.hasWheelContact && (car.position.z > 240 || car.velocity.z > 900 || car.velocity.z < -250)){
         	r.drawString3d("Correcting...", Color.gray, car.position.toFramework(), 2, 2);
-        	control = control.withYaw((float)(-car.orientation.getYaw() / 4F));
+//        	control = control.withYaw((float)(-car.orientation.getYaw() / 4F));
         	control = control.withRoll((float)(-car.orientation.getRoll() / 4F));
         	control = control.withPitch((float)(-car.orientation.getPitch() / 4F));
         }
@@ -194,8 +200,7 @@ public class Dui implements Bot {
     	return Math.max(one, two) - Math.min(one, two);
     }
 
-    /**Return controls for dodging purposes
-     * @param timerChange */
+    /**Return controls for dodging purposes*/
 	private ControlsOutput dodge(ControlsOutput control, float steer, long timerChange){
 		float angle = (steer / 90F);
     	if(timerChange > 2200){
