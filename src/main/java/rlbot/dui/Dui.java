@@ -7,7 +7,13 @@ import java.util.ArrayList;
 import rlbot.Bot;
 import rlbot.ControllerState;
 import rlbot.boost.BoostManager;
-import rlbot.dui.states.*;
+import rlbot.dui.states.AttackState;
+import rlbot.dui.states.BoostState;
+import rlbot.dui.states.CentraliseState;
+import rlbot.dui.states.ChaseState;
+import rlbot.dui.states.KickoffState;
+import rlbot.dui.states.TestState;
+import rlbot.dui.states.WallState;
 import rlbot.flat.GameTickPacket;
 import rlbot.input.CarData;
 import rlbot.input.DataPacket;
@@ -33,6 +39,8 @@ public class Dui implements Bot {
     /**The dodge timer used to determine which point of the dodge we are in, and whether we are eligible to dodge*/
     private long dodgeTimer = 0L;
 
+	public static CarData[] cars;
+
     /**Team index of the current car*/
     public static int team = -10;
 
@@ -50,6 +58,7 @@ public class Dui implements Bot {
 //        new ReturnState();
         new WallState();
         new CentraliseState();
+        new ChaseState();
         new TestState();
     }
 
@@ -87,13 +96,12 @@ public class Dui implements Bot {
         
         //Get a renderer to show graphics for Dui
         Renderer r = BotLoopRenderer.forBotLoop(this);
-//      r.drawString3d(r(input.ball.velocity.magnitude()) + "", Color.white, ballPosition3.toFramework(), 2, 2);
         
         r.drawString2d("Pitch: " + r(car.orientation.getPitch()), Color.gray, new Point(0, 0), 2, 2);
         r.drawString2d("Roll: " + r(car.orientation.getRoll()), Color.gray, new Point(0, 25), 2, 2);
         r.drawString2d("Yaw: " + r(car.orientation.getYaw()), Color.gray, new Point(0, 50), 2, 2);
         
-//        System.out.print(input.cars.length + " Cars, ");
+        cars = input.cars;
 //        for(CarData c : input.cars){
 //        	if(c == null || c.dui) continue;
 //        	r.drawCenteredRectangle3d((c.team == team ? Color.green : Color.red), c.position.toFramework(), 30, 30, false);
@@ -143,7 +151,7 @@ public class Dui implements Bot {
         ControlsOutput control = new ControlsOutput().withSteer(steer).withThrottle(throttle).withSlide(Math.abs(chosen) > 70 && car.position.z < 70);
         
         //Boosting is determined by how little we are turning, whether are are on the ground, and whether we are wanting to go fast
-        boolean boost = kickoff || (Math.abs(steer) < 0.1 && car.hasWheelContact && control.getThrottle() > 0.96 && (!car.isSupersonic || dif(steerBall, steerEnemyGoal) < 10 || ballDistance > 2500) && timerChange > 2000 && !WallState.isOnWall(car));
+        boolean boost = kickoff || (Math.abs(steer) < 0.1 && car.hasWheelContact && control.getThrottle() > 0.9 && (dif(steerBall, steerEnemyGoal) < 10 || ballDistance > 300) && timerChange > 1800 && !WallState.isOnWall(car));
         control = control.withBoost(boost);
         if(boost) System.out.print("Zoom & ");
 
@@ -153,7 +161,7 @@ public class Dui implements Bot {
         	dodge = ballDistance < 1575; //Dodge earlier in a kickoff than normal
         }else{
 //        	dodge = (((ballDistance > 3000 && car.velocity.magnitude() > 600) || (ballDistance < 350 && ballPosition3.z < 220) && Math.min(Math.abs(steerBall), Math.abs(steer)) < 18) && car.position.z < 140);
-        	dodge = (Math.abs(steer) < 0.1 && car.boost < 40 && ballDistance > 4000 && car.velocity.magnitude() > 700) || (ballDistance < 500 && Math.abs(ballPosition3.z) < 170 && (DuiPrediction.isDanger() || dif(steerBall, steerEnemyGoal) < 26));
+        	dodge = (Math.abs(steer) < 0.1 && car.boost < 40 && ballDistance > 4000 && car.velocity.magnitude() > 700) || (ballDistance < 700 && Math.abs(ballPosition3.z) < 170 && (DuiPrediction.isDanger() || dif(steerBall, steerEnemyGoal) < 26 || input.ball.velocity.magnitude() + 300 < car.velocity.magnitude()));
         }
         System.out.print(dodge ? "Dodge" : "Go");
 
@@ -165,6 +173,7 @@ public class Dui implements Bot {
         if(!car.hasWheelContact && (car.position.z > 240 || car.velocity.z > 900 || car.velocity.z < -250)){
         	r.drawString3d("Correcting...", Color.gray, car.position.toFramework(), 2, 2);
 //        	control = control.withYaw((float)(-car.orientation.getYaw() / 4F));
+        	control = control.withYaw((float)Math.toRadians(steerBall));
         	control = control.withRoll((float)(-car.orientation.getRoll() / 4F));
         	control = control.withPitch((float)(-car.orientation.getPitch() / 4F));
         }
@@ -214,7 +223,7 @@ public class Dui implements Bot {
     	}else if(timerChange <= 1000){
     		control.withJump(true); //Dodge
     		control.withPitch(-1 + Math.abs(angle)); //Still keep tipping
-    		control.withRoll(-angle); //Point the way we intend to go
+    		control.withYaw(-angle); //Point the way we intend to go
     	}
     	return control;
 	}

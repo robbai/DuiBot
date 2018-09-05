@@ -17,9 +17,20 @@ public class AttackState extends State {
 	
 	//State which is the most active, makes Dui angle itself to face both the ball and the opponent's goal
 	
-	private static final int curves = 20;
+	/**The clamp value for the curve on the X-axis*/
 	private static final int xClamp = 3990; //3850
-	private final double playerWeight = 1.6D;
+	
+	/**How weighted the curve will be to the player*/
+	private final double playerWeight = 1.48D;
+	
+	/**How many lines there are*/
+	private static final int curves = 20;
+	
+	/**How far each drawn line goes*/
+	private static final double scale = (1D / curves);
+
+	/**Which point of the line*/ 
+	private static final int point = 5;
 	
 	public AttackState() {
 		super("Attack", Color.red);
@@ -63,16 +74,16 @@ public class AttackState extends State {
     	x = Math.max(-xClampNew, Math.min(xClampNew, x)); //Clamp
     	
     	Vector2 target = new Vector2(x, y);
-    	
-    	final double scale = 0.26;
     	Vector2 halfTarget = start.plus(target.minus(start).scaled(scale));
     	
     	//Here we connect the points of our pathway to create a curved line
     	//The final orange line shows where Dui will predict the ball to go when hit from this path
     	r.drawLine3d((depth == 1 ? Color.ORANGE : colour), start.toFramework(), (depth == 1 ? start.plus(target.minus(start).scaled(10000)).confine().toFramework() : halfTarget.toFramework()));
     	
-    	target(input, halfTarget, enemyGoal, r, depth - 1, ball, car);
-    	return halfTarget;
+    	//We choose to return based on which point of the curve we want Dui to point towards
+    	Vector2 result = target(input, halfTarget, enemyGoal, r, depth - 1, ball, car);
+    	if(depth == curves - point) r.drawCenteredRectangle3d(Color.ORANGE, result.toFramework(), 20, 20, false);
+    	return (depth > curves - point ? result : halfTarget);
 	}
 
 }

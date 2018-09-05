@@ -20,7 +20,7 @@ public class KickoffState extends State {
 	@Override
 	public double getOutput(DataPacket input, Vector3 ballPosition3, Vector2 ballPosition, CarData car, Vector2 carPosition, Vector2 carDirection, double ballDistance, double ownGoalDistance, double steerBall, double steerEnemyGoal, Renderer r){
 		if(isKickoff(input.ball)){
-			double smoothness = Math.abs(carPosition.y) / 9000D;
+			double smoothness = Math.abs(carPosition.y) / 11000D;
 			Vector2 target = new Vector2(ballPosition.x, (carPosition.y * smoothness + ballPosition.y) / (smoothness + 1D));
 	        r.drawLine3d(colour, carPosition.toFramework(), target.toFramework());
 			this.setWeight(1000);

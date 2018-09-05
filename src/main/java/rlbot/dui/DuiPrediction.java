@@ -20,12 +20,14 @@ public class DuiPrediction {
 		danger = false;
 		nice = false;
 		
+		boolean render = false;
+		
 		positions = new Vector3[fps * maxSeconds];
 		positions[0] = ball.position.clone();
 		furthestCalculated = 0;
 		if(ball.velocity.isZero()) return;
 		Vector3 vel = ball.velocity.scaled(1D / (double)fps);
-		boolean render = true;
+		
 		for(int i = 1; i < maxSeconds * fps; i++){
 			furthestCalculated ++;
 			if(positions[i - 1].z > 64){
