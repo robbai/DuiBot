@@ -2,12 +2,10 @@ package rlbot.dui.states;
 
 import java.awt.Color;
 
+import rlbot.dui.DuiData;
 import rlbot.dui.State;
 import rlbot.input.BallData;
-import rlbot.input.CarData;
-import rlbot.input.DataPacket;
-import rlbot.obj.*;
-import rlbot.render.Renderer;
+import rlbot.obj.Vector2;
 
 public class KickoffState extends State {
 	
@@ -18,13 +16,13 @@ public class KickoffState extends State {
 	}
 
 	@Override
-	public double getOutput(DataPacket input, Vector3 ballPosition3, Vector2 ballPosition, CarData car, Vector2 carPosition, Vector2 carDirection, double ballDistance, double ownGoalDistance, double steerBall, double steerEnemyGoal, Renderer r){
-		if(isKickoff(input.ball)){
-			double smoothness = Math.abs(carPosition.y) / 11000D;
-			Vector2 target = new Vector2(ballPosition.x, (carPosition.y * smoothness + ballPosition.y) / (smoothness + 1D));
-	        r.drawLine3d(colour, carPosition.toFramework(), target.toFramework());
+	public double getOutput(DuiData d){
+		if(isKickoff(d.input.ball)){
+			double smoothness = Math.abs(d.carPosition.y) / 13000D;
+			Vector2 target = new Vector2(d.ballPosition.x, (d.carPosition.y * smoothness + d.ballPosition.y) / (smoothness + 1D));
+	        d.r.drawLine3d(colour, d.carPosition.toFramework(), target.toFramework());
 			this.setWeight(1000);
-	    	return Math.toDegrees(carDirection.correctionAngle(target.minus(carPosition)));
+	    	return Math.toDegrees(d.carDirection.correctionAngle(target.minus(d.carPosition)));
 		}
 		this.setWeight(0);
 	    return 0;

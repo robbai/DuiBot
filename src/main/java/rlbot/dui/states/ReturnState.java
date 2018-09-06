@@ -3,12 +3,10 @@ package rlbot.dui.states;
 import java.awt.Color;
 
 import rlbot.dui.Dui;
+import rlbot.dui.DuiData;
 import rlbot.dui.DuiPrediction;
 import rlbot.dui.State;
-import rlbot.input.CarData;
-import rlbot.input.DataPacket;
-import rlbot.obj.*;
-import rlbot.render.Renderer;
+import rlbot.obj.Vector2;
 
 public class ReturnState extends State {
 	
@@ -19,31 +17,31 @@ public class ReturnState extends State {
 	}
 
 	@Override
-	public double getOutput(DataPacket input, Vector3 ballPosition3, Vector2 ballPosition, CarData car, Vector2 carPosition, Vector2 carDirection, double ballDistance, double ownGoalDistance, double steerBall, double steerEnemyGoal, Renderer r){
+	public double getOutput(DuiData d){
 		final boolean danger = DuiPrediction.isDanger();
-		if(!DuiPrediction.isNice() && (danger || (ownGoalDistance > 800 && Dui.dif(steerBall, steerEnemyGoal) >= 102))){
+		if(!DuiPrediction.isNice() && (danger || (d.ownGoalDistance > 800 && Dui.dif(d.steerBall, d.steerEnemyGoal) >= 102))){
 			
-        	double angle = Math.toDegrees(carDirection.correctionAngle(Dui.ownGoal.minus(carPosition)));
+        	double angle = Math.toDegrees(d.carDirection.correctionAngle(Dui.ownGoal.minus(d.carPosition)));
 			
         	//Return back to our own goal
-			if(!danger && ballPosition.distance(Dui.enemyGoal) < 2000){
-	            r.drawLine3d(colour, car.position.toFramework(), Dui.ownGoal.toFramework());
+			if(!danger && d.ballPosition.distance(Dui.enemyGoal) < 2000){
+	            d.r.drawLine3d(colour, d.car.position.toFramework(), Dui.ownGoal.toFramework());
 				this.setWeight(0.4);
 	        	return angle;
 			}
 			
 			//Choose to intercept the ball or just return back
-        	if(Dui.dif(angle, steerBall) <= 65 || ballPosition.x < 1100 || danger){
-        		final double modifier = Math.max(50, ballDistance / 2.8D);
-        		Vector2 target = new Vector2(ballPosition.x > carPosition.x ? ballPosition.x - modifier : ballPosition.x + modifier, ballPosition.y);
-        		angle = Math.toDegrees(carDirection.correctionAngle(target.minus(carPosition)));
-                r.drawLine3d(colour, car.position.toFramework(), target.toFramework());
-                r.drawLine3d(colour, target.toFramework(), ballPosition.toFramework());
+        	if(Dui.dif(angle, d.steerBall) <= 65 || d.ballPosition.x < 1100 || danger){
+        		final double modifier = Math.max(50, d.ballDistance / 2.8D);
+        		Vector2 target = new Vector2(d.ballPosition.x > d.carPosition.x ? d.ballPosition.x - modifier : d.ballPosition.x + modifier, d.ballPosition.y);
+        		angle = Math.toDegrees(d.carDirection.correctionAngle(target.minus(d.carPosition)));
+                d.r.drawLine3d(colour, d.car.position.toFramework(), target.toFramework());
+                d.r.drawLine3d(colour, target.toFramework(), d.ballPosition.toFramework());
         	}else{
-                r.drawLine3d(colour, car.position.toFramework(), Dui.ownGoal.toFramework());
+                d.r.drawLine3d(colour, d.car.position.toFramework(), Dui.ownGoal.toFramework());
         	}
         	
-        	this.setWeight(2 + (ownGoalDistance / 2500) * 5);
+        	this.setWeight(2 + (d.ownGoalDistance / 2500) * 5);
         	return angle;
         }else{
         	this.setWeight(0);
@@ -52,12 +50,12 @@ public class ReturnState extends State {
 	}
 	
 //	@Override
-//	public double getOutput(DataPacket input, Vector3 ballPosition3, Vector2 ballPosition, CarData car, Vector2 carPosition, Vector2 carDirection, Vector2 ownGoal, Vector2 enemyGoal, double ballDistance, double ownGoalDistance, double steerBall, double steerEnemyGoal){		
-//    	final Vector2 corner = new Vector2((carPosition.x > 0 ? 3000 - Math.abs(ballPosition.x) / 2 : -3000 + Math.abs(ballPosition.x) / 2), (car.team == 0 ? -5120 : 5120));
-//		if(Dui.dif(steerBall, steerEnemyGoal) >= 120 && Math.abs(corner.y - carPosition.y) + 500 > Math.abs(corner.y - ballPosition.y)){
-//        	this.setWeight(0.6 + (ownGoalDistance / 2500));
-//			double y = (carPosition.y + ballPosition.y) / 2;
-//        	double x = corner.x + Math.abs(corner.y - carPosition.y) / Math.abs(corner.y - ballPosition.y) * -(corner.x - ballPosition.x);
+//	public double getOutput(DataPacket input, Vector3 d.ballPosition3, Vector2 d.ballPosition, d.carData d.car, Vector2 d.d.carPosition, Vector2 d.carDirection, Vector2 ownGoal, Vector2 enemyGoal, double d.ballDistance, double d.ownGoalDistance, double d.steerBall, double steerEnemyGoal){		
+//    	final Vector2 corner = new Vector2((d.d.carPosition.x > 0 ? 3000 - Math.abs(d.ballPosition.x) / 2 : -3000 + Math.abs(d.ballPosition.x) / 2), (d.car.team == 0 ? -5120 : 5120));
+//		if(Dui.dif(d.steerBall, steerEnemyGoal) >= 120 && Math.abs(corner.y - d.d.carPosition.y) + 500 > Math.abs(corner.y - d.ballPosition.y)){
+//        	this.setWeight(0.6 + (d.ownGoalDistance / 2500));
+//			double y = (d.d.carPosition.y + d.ballPosition.y) / 2;
+//        	double x = corner.x + Math.abs(corner.y - d.d.carPosition.y) / Math.abs(corner.y - d.ballPosition.y) * -(corner.x - d.ballPosition.x);
 //        	if(x > 4000){
 //        		x = 4000;
 //        	}else if(x < -4000){
@@ -65,7 +63,7 @@ public class ReturnState extends State {
 //        	}
 //        	System.out.println(x + ", " + y);
 //        	Vector2 target = new Vector2(x, y);
-//        	return Math.toDegrees(carDirection.correctionAngle(target.minus(carPosition)));
+//        	return Math.toDegrees(d.carDirection.correctionAngle(target.minus(d.d.carPosition)));
 //        }else{
 //        	this.setWeight(0);
 //        	return 0;

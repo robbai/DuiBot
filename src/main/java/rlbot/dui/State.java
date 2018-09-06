@@ -2,12 +2,6 @@ package rlbot.dui;
 
 import java.awt.Color;
 
-import rlbot.input.CarData;
-import rlbot.input.DataPacket;
-import rlbot.obj.Vector2;
-import rlbot.obj.Vector3;
-import rlbot.render.Renderer;
-
 public abstract class State {
 	
 	private String name;
@@ -34,7 +28,7 @@ public abstract class State {
 		this.weight = weight;
 	}
 	
-	public abstract double getOutput(DataPacket input, Vector3 ballPosition3, Vector2 ballPosition, CarData car, Vector2 carPosition, Vector2 carDirection, double ballDistance, double ownGoalDistance, double steerBall, double steerEnemyGoal, Renderer r); 
+	public abstract double getOutput(DuiData d); 
 
 	public String toString(final double divisor) {
 		return name + " [" + Dui.r(getWeight() / divisor) + "]";

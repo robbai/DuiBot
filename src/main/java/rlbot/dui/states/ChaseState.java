@@ -3,13 +3,10 @@ package rlbot.dui.states;
 import java.awt.Color;
 
 import rlbot.dui.Dui;
+import rlbot.dui.DuiData;
 import rlbot.dui.DuiPrediction;
 import rlbot.dui.State;
-import rlbot.input.CarData;
-import rlbot.input.DataPacket;
 import rlbot.obj.Vector2;
-import rlbot.obj.Vector3;
-import rlbot.render.Renderer;
 
 public class ChaseState extends State {
 	
@@ -22,14 +19,14 @@ public class ChaseState extends State {
 	}
 
 	@Override
-	public double getOutput(DataPacket input, Vector3 ballPosition3, Vector2 ballPosition, CarData car, Vector2 carPosition, Vector2 carDirection, double ballDistance, double ownGoalDistance, double steerBall, double steerEnemyGoal, Renderer r){
+	public double getOutput(DuiData d){
 		if(!DuiPrediction.isNice() && !DuiPrediction.isDanger()){
-			if(Dui.team == 0 ? (carPosition.y + threshold > ballPosition.y) : (carPosition.y - threshold < ballPosition.y)){
-				Vector2 target = DuiPrediction.ballAfterSeconds(ballDistance / (double)Math.min(2300, 300 + car.velocity.magnitude())).flatten();
-				target = target.plus(Dui.ownGoal.minus(target).normalised().scaled(ballDistance / 100));
-				r.drawLine3d(colour, carPosition.toFramework(), target.toFramework());
+			if(Dui.team == 0 ? (d.carPosition.y + threshold > d.ballPosition.y) : (d.carPosition.y - threshold < d.ballPosition.y)){
+				Vector2 target = DuiPrediction.ballAfterSeconds(d.ballDistance / (double)Math.min(2300, 300 + d.car.velocity.magnitude())).flatten();
+				target = target.plus(Dui.ownGoal.minus(target).normalised().scaled(d.ballDistance / 100));
+				d.r.drawLine3d(colour, d.carPosition.toFramework(), target.toFramework());
 				this.setWeight(2);
-				return Math.toDegrees(carDirection.correctionAngle(target.minus(carPosition)));
+				return Math.toDegrees(d.carDirection.correctionAngle(target.minus(d.carPosition)));
 			}
 		}
 		this.setWeight(0);
