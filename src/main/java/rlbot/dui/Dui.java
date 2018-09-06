@@ -55,6 +55,8 @@ public class Dui implements Bot {
         new WallState();
         new CentraliseState();
         new ChaseState();
+        new DemoState();
+        
         new TestState();
     }
 
