@@ -21,13 +21,13 @@ public class BoostState extends State {
 	@Override
 	public double getOutput(DuiData d){ 		
 		BoostPad b = getNearestBoostpad(d.carPosition);
-        if(b != null && !DuiPrediction.isDanger()){
+        if(b != null && !DuiPrediction.isDanger() && !KickoffState.isKickoff(d.input.ball)){
         	Vector2 boostLocation = b.getLocation().flatten();
         	double boostDistance = d.carPosition.distance(boostLocation);
         	double angle = Math.toDegrees(d.carDirection.correctionAngle(boostLocation.minus(d.carPosition)));
         	if((Math.abs(angle) < 15 && boostDistance < d.ballDistance) || (d.ballDistance > 4000 && Math.abs(d.carPosition.y) < 5120 && d.ballPosition.distance(Dui.ownGoal) > Math.max(1300, d.carPosition.distance(Dui.ownGoal)) && Math.abs(d.ballPosition.y) > 100)){
         		d.r.drawLine3d(colour, d.car.position.toFramework(), boostLocation.toFramework());
-	            this.setWeight(Math.pow((100 - d.car.boost) / 100D, 2) * (b.isFullBoost() ? Math.max(30, Math.abs(Dui.dif(d.steerBall, angle))) : 1));
+	            this.setWeight(Math.pow((100 - d.car.boost) / 100D, 2) * Math.max(30, Math.abs(Dui.dif(d.steerBall, angle))));
 		        return angle;            
         	}else{
         		this.setWeight(0);
@@ -42,18 +42,10 @@ public class BoostState extends State {
 	private BoostPad getNearestBoostpad(Vector2 carPosition){
 		if(carPosition == null) return null;
     	BoostPad best = null;
-    	double bestDistance = 0;    	
-    	for(BoostPad b : BoostManager.getSmallBoosts()){
-			Vector2 pos = b.getLocation().flatten();
-			double dist = carPosition.distance(pos);
-    		if(b.isActive() && (best == null || dist < bestDistance)){
-    			best = b;
-    			bestDistance = dist;
-    		}
-    	}    	
+    	double bestDistance = 0;    	 	
     	for(BoostPad b : BoostManager.getFullBoosts()){
 			Vector2 pos = b.getLocation().flatten();
-			double dist = carPosition.distance(pos) / 6;
+			double dist = carPosition.distance(pos);
     		if(b.isActive() && (best == null || dist < bestDistance)){
     			best = b;
     			bestDistance = dist;

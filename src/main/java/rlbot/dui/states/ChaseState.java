@@ -25,7 +25,7 @@ public class ChaseState extends State {
 				Vector2 target = DuiPrediction.ballAfterSeconds(d.ballDistance / (double)Math.min(2300, 300 + d.car.velocity.magnitude())).flatten();
 				target = target.plus(Dui.ownGoal.minus(target).normalised().scaled(d.ballDistance / 100));
 				d.r.drawLine3d(colour, d.carPosition.toFramework(), target.toFramework());
-				this.setWeight(2);
+				this.setWeight(4);
 				return Math.toDegrees(d.carDirection.correctionAngle(target.minus(d.carPosition)));
 			}
 		}

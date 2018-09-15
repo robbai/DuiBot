@@ -18,7 +18,7 @@ public class DefendState extends State {
 
 	@Override
 	public double getOutput(DuiData d){
-		if((d.carPosition.distance(Dui.ownGoal) < 2500) || (d.car.team == 0 ? d.carPosition.y < -4800 : d.carPosition.y > 4800)){
+		if(!CentraliseState.isBackboardRolling(d.input.ball) && (!DuiPrediction.isDanger() || d.carPosition.y > d.ballPosition.y - 100) && (d.carPosition.distance(Dui.ownGoal) < 2500) || (d.car.team == 0 ? d.carPosition.y < -4800 : d.carPosition.y > 4800)){
 			if(DuiPrediction.isDanger()){
 				d.r.drawLine3d(colour, d.carPosition.toFramework(), d.ballPosition.toFramework());
 				this.setWeight(7 + 2000 / d.ballDistance);

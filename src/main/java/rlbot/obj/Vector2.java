@@ -93,4 +93,20 @@ public class Vector2 {
     	return new Vector2(Math.max(-4096, Math.min(4096, x)), Math.max(-5120, Math.min(5120, y)));
     }
     
+    public Vector2 confineRatio(){
+    	Vector2 v;
+    	if(Math.abs(x) * (5120F / 4096F) > Math.abs(y)){
+    		v = new Vector2(x > 0 ? 4096 : -4096, y * (4096F / Math.abs(x)));
+    		return v;
+    	}else{
+    		v = new Vector2(x * (5120F / Math.abs(y)), y > 0 ? 5120 : -5120);
+    		return v;
+    	}
+    }
+
+	@Override
+	public String toString() {
+		return "[" + (int)x + ", " + (int)y + "]";
+	}
+    
 }

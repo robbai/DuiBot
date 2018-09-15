@@ -18,14 +18,16 @@ public class KickoffState extends State {
 	@Override
 	public double getOutput(DuiData d){
 		if(isKickoff(d.input.ball)){
-			double smoothness = Math.abs(d.carPosition.y) / 13000D;
-			Vector2 target = new Vector2(d.ballPosition.x, (d.carPosition.y * smoothness + d.ballPosition.y) / (smoothness + 1D));
+			d.r.drawString3d((int)Math.abs(d.carPosition.y) + "", this.colour, d.car.position.toFramework(), 2, 2);
+			double carWeight = Math.abs(d.carPosition.y) > 3000 ? (2.2D - (Math.abs(d.carPosition.y) / 2500D)) : Math.pow(d.carPosition.y, 2) / Math.pow(6000D, 2);;
+			Vector2 target = new Vector2(d.ballPosition.x, (d.carPosition.y * carWeight + d.ballPosition.y) / (carWeight + 1D));
 	        d.r.drawLine3d(colour, d.carPosition.toFramework(), target.toFramework());
 			this.setWeight(1000);
 	    	return Math.toDegrees(d.carDirection.correctionAngle(target.minus(d.carPosition)));
+		}else{
+			this.setWeight(0);
+		    return 0;
 		}
-		this.setWeight(0);
-	    return 0;
 	}
 
 	/**Determines whether the ball is stationary in the middle of the field*/

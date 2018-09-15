@@ -28,7 +28,7 @@ public class AttackState extends State {
 	private static final int curves = 25;
 	
 	/**How far each drawn line goes*/
-	private static final double scale = (1D / curves);
+	private static final double scale = (2.5D / curves);
 
 	/**Which point of the line*/ 
 	private static final int point = 5;
@@ -53,7 +53,7 @@ public class AttackState extends State {
         	//We add a slight offset to the ball to ensure we hit it at the correct angle
         	//Useful when we don't start with the best angle 
         	d.r.drawCenteredRectangle3d(this.colour, ballPredict.flatten().toFramework(), 26, 26, false);
-        	ballPredict = ballPredict.minus(enemyGoal.minus(ballPredict.flatten()).normalised().scaled(Math.min(400, d.ballDistance / 11)));        	
+        	ballPredict = ballPredict.minus(enemyGoal.minus(ballPredict.flatten()).normalised().scaled(Math.min(40, d.ballDistance / 10)));        	
         	d.r.drawCenteredRectangle3d(this.colour, ballPredict.flatten().toFramework(), 20, 20, false);
         	
         	//Get the target to point towards
@@ -68,7 +68,7 @@ public class AttackState extends State {
 	private Vector2 target(DataPacket input, Vector2 start, Vector2 enemyGoal, Renderer r, int depth, Vector3 ball, CarData car){
 		if(depth == 0){
 	    	//The final orange line shows where Dui will predict the ball to go when hit from this path
-			r.drawLine3d(Color.ORANGE, start.toFramework(), start.plus(ball.flatten().minus(start).scaled(1000)).confine().toFramework());
+			r.drawLine3d(Color.ORANGE, start.toFramework(), start.plus(ball.flatten().minus(start).scaled(10000)).confineRatio().toFramework());
 			return null;
 		}
 		

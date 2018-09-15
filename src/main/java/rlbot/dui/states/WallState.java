@@ -16,7 +16,7 @@ public class WallState extends State {
 
 	@Override
 	public double getOutput(DuiData d){
-		int maxZ = (d.ballDistance < 1200 ? (int)(d.ballPosition3.z - 100) : 220);
+		int maxZ = (d.ballDistance < 1200 ? Math.max((int)(d.ballPosition3.z - 100), 220) : 220);
 		if(isOnWall(d.car, maxZ)){
 			d.r.drawString3d("Wall", this.colour, d.car.position.toFramework(), 2, 2);
 			this.setWeight(10000);

@@ -37,7 +37,7 @@ public class DemoState extends State {
 			CarData target = Dui.cars[targetIndex];
 			double ang = Math.toDegrees(d.carDirection.correctionAngle(target.position.flatten().minus(d.carPosition)));
 			double targetDistance = d.carPosition.distance(target.position.flatten());
-			if(target != null && !DuiPrediction.isDanger() && ((System.currentTimeMillis() - targetSet < 2750) || DuiPrediction.isNice() || (Dui.dif(d.steerBall, ang) < 20 && d.ballDistance > targetDistance))){
+			if(target != null && !DuiPrediction.isDanger() && !target.isSupersonic && ((System.currentTimeMillis() - targetSet < 2750) || DuiPrediction.isNice() || (Dui.dif(d.steerBall, ang) < 20 && d.ballDistance > targetDistance))){
 				if(System.currentTimeMillis() - targetSet > 8000) targetSet = System.currentTimeMillis();
 				d.r.drawLine3d(colour, d.carPosition.toFramework(), target.position.flatten().toFramework());
 				d.r.drawCenteredRectangle3d(colour, target.position.flatten().toFramework(), 30, 30, false);
