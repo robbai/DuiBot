@@ -65,16 +65,10 @@ public class Vector2 {
     public double correctionAngle(Vector2 ideal){
         double currentRad = Math.atan2(y, x);
         double idealRad = Math.atan2(ideal.y, ideal.x);
-
         if(Math.abs(currentRad - idealRad) > Math.PI){
-            if(currentRad < 0){
-                currentRad += Math.PI * 2;
-            }
-            if(idealRad < 0){
-                idealRad += Math.PI * 2;
-            }
+            if(currentRad < 0) currentRad += Math.PI * 2;
+            if(idealRad < 0) idealRad += Math.PI * 2;
         }
-
         return idealRad - currentRad;
     }
 

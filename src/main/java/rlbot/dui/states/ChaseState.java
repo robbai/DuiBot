@@ -6,6 +6,7 @@ import rlbot.dui.Dui;
 import rlbot.dui.DuiData;
 import rlbot.dui.DuiPrediction;
 import rlbot.dui.State;
+import rlbot.input.CarData;
 import rlbot.obj.Vector2;
 
 public class ChaseState extends State {
@@ -23,7 +24,7 @@ public class ChaseState extends State {
 		if(!DuiPrediction.isNice() && !DuiPrediction.isDanger()){
 			if(Dui.team == 0 ? (d.carPosition.y + threshold > d.ballPosition.y) : (d.carPosition.y - threshold < d.ballPosition.y)){
 				Vector2 target = DuiPrediction.ballAfterSeconds(d.ballDistance / (double)Math.min(2300, 300 + d.car.velocity.magnitude())).flatten();
-				target = target.plus(Dui.ownGoal.minus(target).normalised().scaled(d.ballDistance / 100));
+				target = target.plus(Dui.ownGoal.minus(target).normalised().scaled(Math.max(d.ballDistance / 65, getClosestEnemyToBall(d) / 10D)));
 				d.r.drawLine3d(colour, d.carPosition.toFramework(), target.toFramework());
 				this.setWeight(4);
 				return Math.toDegrees(d.carDirection.correctionAngle(target.minus(d.carPosition)));
@@ -31,6 +32,20 @@ public class ChaseState extends State {
 		}
 		this.setWeight(0);
 		return 0;
+	}
+	
+	public static double getClosestEnemyToBall(DuiData d){
+		CarData closest = null;
+		double shortestDistance = 5120 * 2;
+		for(CarData car : d.input.cars){
+			if(car == null || car.team == Dui.team) continue;
+			double distance = car.position.flatten().distance(d.ballPosition);
+			if(closest == null || distance < shortestDistance){
+				closest = car;
+				shortestDistance = distance;
+			}
+		}
+		return shortestDistance;
 	}
 
 }

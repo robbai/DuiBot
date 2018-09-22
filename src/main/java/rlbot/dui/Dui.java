@@ -40,6 +40,8 @@ public class Dui implements Bot {
 
     /**Dui's home*/public static Vector2 ownGoal;
     /**Dui's target*/public static Vector2 enemyGoal;
+    
+    public static float lastSteeringFrame = 0F;
 
     public Dui(int playerIndex){
         this.playerIndex = playerIndex;           
@@ -48,10 +50,9 @@ public class Dui implements Bot {
         new AttackState();
         new KickoffState();
         new BoostState();
-        
         new DefendState();
         new ReturnState();
-        
+        new InterceptState();
         new WallState();
         new CentraliseState();
         new ChaseState();
@@ -74,26 +75,64 @@ public class Dui implements Bot {
         
         //Make our own little data file so we don't have to recalculate angles and such
     	DuiData d = new DuiData(input, r);
-        
-        //Start printing, deal with the weights and the decided angle
-        System.out.print(this.playerIndex + ": ");
-        double totalWeight = 0, greatestWeight = 1;
-        double[] angles = new double[states.size()];
-        double chosen = 0;
-        
-        r.drawString2d("Pitch: " + r(d.car.orientation.getPitch()), Color.gray, new Point(0, 0), 2, 2);
-        r.drawString2d("Roll: " + r(d.car.orientation.getRoll()), Color.gray, new Point(0, 25), 2, 2);
-        r.drawString2d("Yaw: " + r(d.car.orientation.getYaw()), Color.gray, new Point(0, 50), 2, 2);
-        
-        cars = input.cars;
-        
-        //Prediction updating
+    	
+    	//Prediction updating
         DuiPrediction.update(input.ball, r);
         if(DuiPrediction.isDanger()){
         	r.drawString3d("!", Color.red, d.car.position.plus(new Vector3(0, 0, 150)).toFramework(), 4, 4);
         }else if(DuiPrediction.isNice()){
         	r.drawString3d(":)", Color.green, d.car.position.plus(new Vector3(0, 0, 150)).toFramework(), 4, 4);
         }
+    	
+    	//Aerialing
+    	if(!DuiAerial.aerialing){
+    		DuiAerial.setTarget(d);
+    		boolean start = DuiAerial.shouldStartAerial(d, false);
+    		if(start){
+    			DuiAerial.aerialing = true;
+    			DuiAerial.timer = System.currentTimeMillis();
+    		}
+    	}else{
+    		DuiAerial.aerialing = DuiAerial.shouldContinueAerial(d);
+    	}
+    	if(DuiAerial.aerialing){
+    		System.out.print("Aerialing: "); //Start the line
+        	
+    		final int size = 1;
+    		final int y = 10;
+    	    r.drawString2d("Pitch: " + r(d.car.orientation.getPitch()), Color.cyan, new Point(0, 0), size, size);
+            r.drawString2d("Yaw: " + r(d.car.orientation.getYaw()), Color.cyan, new Point(0, y), size, size);
+            r.drawString2d("Roll: " + r(d.car.orientation.getRoll()), Color.cyan, new Point(0, y * 2), size, size);
+            r.drawString2d("Nose: " + d.car.orientation.noseVector.toString(), Color.cyan, new Point(0, y * 3), size, size);
+            r.drawString2d("Right: " + d.car.orientation.rightVector.toString(), Color.cyan, new Point(0, y * 4), size, size);
+            r.drawString2d("Roof: " + d.car.orientation.roofVector.toString(), Color.cyan, new Point(0, y * 5), size, size);
+            	                  
+    		ControlsOutput a = DuiAerial.controller(d);
+    		System.out.println(); //End the line
+    		return a;
+    	}
+    	
+    	//Game state setting
+//    	if(KickoffState.isKickoff(d.input.ball)){
+//	    	GameState s = new GameState().withBallState(new BallState().withPhysics(new PhysicsState().withVelocity(new DesiredVector3(0F, 0F, 1000F))));
+//	    	RLBotDll.setGameState(s.buildPacket());
+//    	}
+    	
+//	    GameState gameState = new GameState().withBallState(new BallState().withPhysics(new PhysicsState().withVelocity(new DesiredVector3(0F, 0F, 0F)).withLocation(new DesiredVector3(-1000F, -1000 + (float)(System.currentTimeMillis() % 10000) / 5, (float)(1000F + 500F * Math.sin((double)System.currentTimeMillis() / 1000D))))));	        
+//	    Vector3 face = DuiAerial.getAngle(d);	        
+//	    //(System.currentTimeMillis() % 10000) / 1000F
+//	    gameState = gameState.withCarState(playerIndex, new CarState().withPhysics(new PhysicsState().withLocation(new DesiredVector3(0F, 0F, 1000F)).withVelocity(new DesiredVector3(0F, 0F, 0F))
+//	      		.withRotation(new DesiredRotation((float)(face.x + d.car.orientation.getPitch()), (float)(face.y + d.car.orientation.getYaw()), 0F))));	        
+//	    RLBotDll.setGameState(gameState.buildPacket());
+//	    return new ControlsOutput().withSteer(0F).withBoost(false).withJump(false);   
+        
+        //Start printing, deal with the weights and the decided angle
+        System.out.print(this.playerIndex + ": ");
+        double totalWeight = 0, greatestWeight = 1;
+        double[] angles = new double[states.size()];
+        double chosen = 0;
+          
+        cars = input.cars;
         
         final long timerChange = System.currentTimeMillis() - dodgeTimer;
 
@@ -141,7 +180,7 @@ public class Dui implements Bot {
         	dodge = d.car.boost < 4; //Dodge earlier in a kickoff than normal
         }else{
         	if(d.car.boost < 10){
-        		dodge = (Math.abs(steer) < 0.14 && ((d.ballDistance > 2200 && d.car.velocity.magnitude() > 400) || d.ballDistance < 250));
+        		dodge = Math.abs(steer) < (d.ballDistance < 320 ? 0.3 : 0.2) && ((d.ballDistance > 1100 && d.car.velocity.magnitude() > 400) || (d.ballDistance < 190 && dif(d.steerBall, d.steerEnemyGoal) < 32));
         	}else{
         		dodge = (d.ballDistance < 700 && Math.abs(d.ballPosition3.z) < 160 && (DuiPrediction.isDanger() || dif(d.steerBall, d.steerEnemyGoal) < 26 || input.ball.velocity.magnitude() + 500 < d.car.velocity.magnitude()));
         	}
@@ -151,19 +190,21 @@ public class Dui implements Bot {
         //Dealing with the actual process of dodging (where we are in the action of dodging)
         if(dodge || timerChange <= 1000){
         	if(kickoff){
-        		control = dodge(control, (float)(d.steerBall * 1.8F), timerChange);
+        		control = dodge(control, (float)(d.steerBall * 2.3F), timerChange);
         	}else{
-        		control = dodge(control, (float)(d.ballDistance > 1400 ? chosen : d.steerBall * 1.1F), timerChange);
+        		control = dodge(control, (float)(d.ballDistance > 1400 ? chosen : d.steerBall), timerChange);
         	}
         }
         
         //Car correction when we're falling
         if(!d.car.hasWheelContact && !boost && (d.car.position.z > 220 || d.car.velocity.z > 650 || d.car.velocity.z < -175)){
         	r.drawString3d("Correcting...", Color.gray, d.car.position.toFramework(), 2, 2);
+        	control = control.withYaw((float)DuiAerial.yaw(d.ballPosition3.minus(input.car.position), d) / 10F);
         	control = control.withRoll((float)((d.car.orientation.getRoll() > 0 ? -1 : 1) * Math.log(1 + Math.abs(d.car.orientation.getRoll()))));
         	control = control.withPitch((float)((d.car.orientation.getPitch() > 0 ? -1 : 1) * Math.log(1 + Math.abs(d.car.orientation.getPitch()))));
         }
 
+        lastSteeringFrame = steer;
         System.out.println(); //End the line we've been printing to
         return control;
     }

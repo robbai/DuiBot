@@ -1,4 +1,4 @@
-package rlbot.dui;
+package rlbot.dui.test;
 
 import rlbot.obj.Vector3;
 

@@ -11,14 +11,13 @@ public class CarOrientation {
     public Vector3 roofVector;
     public Vector3 rightVector;
 
-    public CarOrientation(Vector3 noseVector, Vector3 roofVector) {
-
+    public CarOrientation(Vector3 noseVector, Vector3 roofVector){
         this.noseVector = noseVector;
         this.roofVector = roofVector;
         this.rightVector = noseVector.crossProduct(roofVector);
     }
 
-    public static CarOrientation fromFlatbuffer(PlayerInfo playerInfo) {
+    public static CarOrientation fromFlatbuffer(PlayerInfo playerInfo){
         return convert(
                 playerInfo.physics().rotation().pitch(),
                 playerInfo.physics().rotation().yaw(),
@@ -28,7 +27,7 @@ public class CarOrientation {
     /**
      * All params are in radians.
      */
-    private static CarOrientation convert(double ipitch, double iyaw, double iroll) {
+    private static CarOrientation convert(double ipitch, double iyaw, double iroll){
     	pitch = ipitch;
     	yaw = iyaw;
     	roll = iroll;
@@ -44,15 +43,15 @@ public class CarOrientation {
         return new CarOrientation(new Vector3(noseX, noseY, noseZ), new Vector3(roofX, roofY, roofZ));
     }
     
-    public double getPitch() {
+    public double getPitch(){
 		return pitch;
 	}
 
-	public double getYaw() {
+	public double getYaw(){
 		return yaw;
 	}
 
-	public double getRoll() {
+	public double getRoll(){
 		return roll;
 	}
 	

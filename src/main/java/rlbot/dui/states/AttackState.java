@@ -25,13 +25,13 @@ public class AttackState extends State {
 	private final double playerWeight = 1.49D;
 	
 	/**How many lines there are*/
-	private static final int curves = 25;
+	private static final int curves = 15;
 	
 	/**How far each drawn line goes*/
 	private static final double scale = (2.5D / curves);
 
 	/**Which point of the line*/ 
-	private static final int point = 5;
+	private static final int point = 3;
 	
 	public AttackState() {
 		super("Attack", Color.red);
@@ -44,7 +44,7 @@ public class AttackState extends State {
         	this.setWeight(1.2 + (d.car.boost / 200D) + (enemyGoalDistance / 16000));
         	        
         	//Predict where the ball will be when we get there
-        	Vector3 ballPredict = DuiPrediction.ballAfterSeconds((double)d.ballDistance / (double)Math.min(2300, 340 + d.car.velocity.magnitude()));
+        	Vector3 ballPredict = DuiPrediction.ballAfterSeconds(d.ballDistance / (double)Math.min(2300, 480 + d.car.velocity.magnitude()));
         	
         	//Get an appropriate target for where Dui is shooting, rather than the centre of the goal
         	Vector2 enemyGoal = new Vector2(Math.max(-770, Math.min(770, ballPredict.x)), Dui.enemyGoal.y);
@@ -53,7 +53,7 @@ public class AttackState extends State {
         	//We add a slight offset to the ball to ensure we hit it at the correct angle
         	//Useful when we don't start with the best angle 
         	d.r.drawCenteredRectangle3d(this.colour, ballPredict.flatten().toFramework(), 26, 26, false);
-        	ballPredict = ballPredict.minus(enemyGoal.minus(ballPredict.flatten()).normalised().scaled(Math.min(40, d.ballDistance / 10)));        	
+        	ballPredict = ballPredict.minus(enemyGoal.minus(ballPredict.flatten()).normalised().scaled(Math.min(26, d.ballDistance / 15D)));        	
         	d.r.drawCenteredRectangle3d(this.colour, ballPredict.flatten().toFramework(), 20, 20, false);
         	
         	//Get the target to point towards

@@ -13,6 +13,8 @@ public class DataPacket {
     public final CarData[] cars;
 
     public DataPacket(GameTickPacket request, int playerIndex){
+    	if(request.playersLength() == 0) System.out.println("Ready!");
+    	
         this.ball = new BallData(request.ball());
         
         //We have to do this before Dui, otherwise Dui's orientation gets mixed up with other cars (for some reason)

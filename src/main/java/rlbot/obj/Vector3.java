@@ -1,5 +1,7 @@
 package rlbot.obj;
 
+import rlbot.dui.Dui;
+
 public class Vector3 {
 
     public double x;
@@ -124,5 +126,14 @@ public class Vector3 {
     public Vector3 divide(Vector3 m){
         return new Vector3(x / m.x, y / m.y, z / m.z);
     }
+
+	@Override
+	public String toString(){
+		return "(" + Dui.r(x) + ", " + Dui.r(y) + ", " + Dui.r(z) + ")";
+	}
+	
+	public Vector3 withX(double x){return new Vector3(x, this.y, this.z);}
+	public Vector3 withY(double y){return new Vector3(this.x, y, this.z);}
+	public Vector3 withZ(double z){return new Vector3(this.x, this.y, z);}	
     
 }
