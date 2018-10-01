@@ -18,7 +18,7 @@ public class KickoffState extends State {
 	@Override
 	public double getOutput(DuiData d){
 		if(isKickoff(d.input.ball)){
-			d.r.drawString3d((int)Math.abs(d.carPosition.y) + "", this.colour, d.car.position.toFramework(), 2, 2);
+//			d.r.drawString3d((int)Math.abs(d.carPosition.y) + "y-uu", this.colour, d.car.position.toFramework(), 2, 2);
 			double carWeight = (d.ballDistance > 3000 ? 0.9D * (1800D / d.ballDistance) : 0.1D);
 			Vector2 target = new Vector2(d.ballPosition.x, (d.carPosition.y * carWeight + d.ballPosition.y) / (carWeight + 1D));
 	        d.r.drawLine3d(colour, d.carPosition.toFramework(), target.toFramework());

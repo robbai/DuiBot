@@ -16,16 +16,16 @@ public class ReturnState extends State {
 
 	@Override
 	public double getOutput(DuiData d){		
-		if(d.ownGoalDistance > 800 && Dui.dif(d.steerBall, d.steerEnemyGoal) >= 90){
+		if(d.ownGoalDistance > 900 && Dui.dif(d.steerBall, d.steerEnemyGoal) > 90 && Dui.dif(d.steerBall, d.steerOwnGoal) > 35){
         	double angle = Math.toDegrees(d.carDirection.correctionAngle(Dui.ownGoal.minus(d.carPosition)));
 			d.r.drawLine3d(colour, d.carPosition.toFramework(), Dui.ownGoal.toFramework());
 			
 			if(d.ballPosition.distance(Dui.enemyGoal) < 2000){
-				this.setWeight(0.4);
-	        	return angle;
+				this.setWeight(0.8);
+			}else{
+	        	this.setWeight(1.2 + (d.ownGoalDistance / 2500) * 2);
 			}
         	
-        	this.setWeight(0.8 + (d.ownGoalDistance / 2500) * 2);
         	return angle;
         }else{
         	this.setWeight(0);

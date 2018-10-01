@@ -11,6 +11,7 @@ public class DuiPythonInterface extends DefaultPythonInterface {
     }
 
     protected Bot initBot(int index, String botType, int team){
+    	DuiJava.addBot(index, team);
         return new Dui(index);
     }
     

@@ -102,5 +102,8 @@ public class Vector2 {
 	public String toString() {
 		return "[" + (int)x + ", " + (int)y + "]";
 	}
+	
+	public Vector2 withX(double x){return new Vector2(x, this.y);}
+	public Vector2 withY(double y){return new Vector2(this.x, y);}	
     
 }

@@ -18,20 +18,11 @@ public class AttackState extends State {
 	
 	//State which is the most active, makes Dui angle itself to face both the ball and the opponent's goal
 	
-	/**The clamp value for the curve on the X-axis*/
-	private static final int xClamp = 3990; //3850
-	
-	/**How weighted the curve will be to the player*/
-	private final double playerWeight = 1.49D;
-	
-	/**How many lines there are*/
-	private static final int curves = 15;
-	
-	/**How far each drawn line goes*/
-	private static final double scale = (2.5D / curves);
-
-	/**Which point of the line*/ 
-	private static final int point = 3;
+	/**The clamp value for the curve on the X-axis*/private static final int xClamp = 3940; //3850	
+	/**How weighted the curve will be to the player*/private final double playerWeight = 1.2D;
+	/**How many lines there are when drawing our path*/private static final int curves = 20;
+	/**How far each drawn line goes*/private static final double scale = 0.21D;
+	/**Which point of the line to point towards*/private static final int point = 6;
 	
 	public AttackState() {
 		super("Attack", Color.red);
@@ -44,16 +35,16 @@ public class AttackState extends State {
         	this.setWeight(1.2 + (d.car.boost / 200D) + (enemyGoalDistance / 16000));
         	        
         	//Predict where the ball will be when we get there
-        	Vector3 ballPredict = DuiPrediction.ballAfterSeconds(d.ballDistance / (double)Math.min(2300, 480 + d.car.velocity.magnitude()));
+        	Vector3 ballPredict = DuiPrediction.ballAfterSeconds(d.ballDistance / (double)Math.min(2300, 340 + d.car.velocity.magnitude()));
         	
         	//Get an appropriate target for where Dui is shooting, rather than the centre of the goal
         	Vector2 enemyGoal = new Vector2(Math.max(-770, Math.min(770, ballPredict.x)), Dui.enemyGoal.y);
-        	d.r.drawCenteredRectangle3d(Color.ORANGE, enemyGoal.toFramework(), 30, 30, false);
+        	d.r.drawCenteredRectangle3d(colour, enemyGoal.toFramework(), 30, 30, false);
         	
         	//We add a slight offset to the ball to ensure we hit it at the correct angle
         	//Useful when we don't start with the best angle 
         	d.r.drawCenteredRectangle3d(this.colour, ballPredict.flatten().toFramework(), 26, 26, false);
-        	ballPredict = ballPredict.minus(enemyGoal.minus(ballPredict.flatten()).normalised().scaled(Math.min(26, d.ballDistance / 15D)));        	
+        	ballPredict = ballPredict.minus(enemyGoal.minus(ballPredict.flatten()).normalised().scaled(Math.min(22, d.ballDistance / 25D)));        	
         	d.r.drawCenteredRectangle3d(this.colour, ballPredict.flatten().toFramework(), 20, 20, false);
         	
         	//Get the target to point towards
@@ -67,8 +58,8 @@ public class AttackState extends State {
 	/**This method is used for creating a curved line of attack towards the ball*/
 	private Vector2 target(DataPacket input, Vector2 start, Vector2 enemyGoal, Renderer r, int depth, Vector3 ball, CarData car){
 		if(depth == 0){
-	    	//The final orange line shows where Dui will predict the ball to go when hit from this path
-			r.drawLine3d(Color.ORANGE, start.toFramework(), start.plus(ball.flatten().minus(start).scaled(10000)).confineRatio().toFramework());
+	    	//The final line shows where Dui will predict the ball to go when hit from this path
+//			r.drawLine3d(colour, start.toFramework(), start.plus(ball.flatten().minus(start).scaled(10000)).confineRatio().toFramework());
 			return null;
 		}
 		
@@ -86,7 +77,7 @@ public class AttackState extends State {
     	
     	//We choose to return based on which point of the curve we want Dui to point towards
     	Vector2 result = target(input, halfTarget, enemyGoal, r, depth - 1, ball, car);
-    	if(depth == curves - point) r.drawCenteredRectangle3d(Color.ORANGE, result.toFramework(), 15, 15, false);
+    	if(depth == curves - point) r.drawCenteredRectangle3d(colour, result.toFramework(), 15, 15, false);
     	return (depth > curves - point ? result : halfTarget);
 	}
 

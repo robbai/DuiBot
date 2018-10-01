@@ -21,14 +21,18 @@ public class ChaseState extends State {
 
 	@Override
 	public double getOutput(DuiData d){
-		if(!DuiPrediction.isNice() && !DuiPrediction.isDanger()){
-			if(Dui.team == 0 ? (d.carPosition.y + threshold > d.ballPosition.y) : (d.carPosition.y - threshold < d.ballPosition.y)){
-				Vector2 target = DuiPrediction.ballAfterSeconds(d.ballDistance / (double)Math.min(2300, 300 + d.car.velocity.magnitude())).flatten();
-				target = target.plus(Dui.ownGoal.minus(target).normalised().scaled(Math.max(d.ballDistance / 65, getClosestEnemyToBall(d) / 10D)));
-				d.r.drawLine3d(colour, d.carPosition.toFramework(), target.toFramework());
-				this.setWeight(4);
-				return Math.toDegrees(d.carDirection.correctionAngle(target.minus(d.carPosition)));
-			}
+		if(chase(d)){
+			Vector2 target = DuiPrediction.ballAfterSeconds(d.ballDistance / (double)Math.min(2300, 550 + d.car.velocity.magnitude())).flatten();
+			
+			final double enemyDistance = getClosestEnemyToBall(d);
+			final double s = Math.min(d.ballDistance * 0.3D, enemyDistance * 0.1D);
+			target = target.plus(Dui.ownGoal.minus(target).normalised().scaled(s));
+			
+			d.r.drawLine3d(colour, d.carPosition.toFramework(), target.toFramework());
+//			d.r.drawString3d((int)s + "uu", colour, target.toFramework(), 2, 2);
+			
+			this.setWeight(4 + (enemyDistance / 250D));
+			return Math.toDegrees(d.carDirection.correctionAngle(target.minus(d.carPosition)));
 		}
 		this.setWeight(0);
 		return 0;
@@ -46,6 +50,14 @@ public class ChaseState extends State {
 			}
 		}
 		return shortestDistance;
+	}
+	
+	public static boolean chase(DuiData d){
+		if(!DuiPrediction.isNice() && !DuiPrediction.isDanger() && Dui.dif(d.steerBall, d.steerEnemyGoal) > 65){
+			return (Dui.team == 0 ? (d.carPosition.y + threshold > d.ballPosition.y) : (d.carPosition.y - threshold < d.ballPosition.y));
+		}else{
+			return false;
+		}
 	}
 
 }

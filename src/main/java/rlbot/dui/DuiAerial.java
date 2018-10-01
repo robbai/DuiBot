@@ -8,6 +8,8 @@ import rlbot.output.ControlsOutput;
 
 public class DuiAerial {
 	
+	public static final boolean enabled = true; 
+	
 	/**Angle multiplier for pitch, yaw, and roll*/private static final float[] angleHarshness = new float[] {1.2F, 0.6F, 0.1F};
 	
 	public static Vector3 target;
@@ -21,13 +23,8 @@ public class DuiAerial {
 	private static final double pitchMax = 0.925D;
 	
 	public static boolean shouldStartAerial(DuiData d, boolean setup){
-//		return false;
-		try {
-			return d.car.boost * 95D >= d.ballDistance && !WallState.isOnWall(d.car) && d.ballDistance < d.ballPosition3.z * (setup ? 7D : 6D) && d.ballDistance > d.ballPosition3.z * 1.5D && (setup || (Math.abs(steerTarget) < 10D / (d.ballDistance / 500D) && Math.abs(Dui.lastSteeringFrame) <= 0.02F)) && d.car.hasWheelContact && (d.ballPosition3.z > (d.input.ball.velocity.isZero() ? 220 : 700) || Math.abs(d.input.ball.velocity.z) > 530);
-		}catch(Exception e){
-			e.printStackTrace();
-			return false;
-		}
+		if(!enabled) return false;
+		return d.car.boost * 95D >= d.ballDistance && !WallState.isOnWall(d.car) && d.ballDistance < d.ballPosition3.z * (setup ? 7D : 6D) && d.ballDistance > d.ballPosition3.z * 1.5D && (setup || (Math.abs(steerTarget) < 10D / (d.ballDistance / 500D) && Math.abs(Dui.lastSteeringFrame) <= 0.02F)) && d.car.hasWheelContact && (d.ballPosition3.z > (d.input.ball.velocity.isZero() ? 220 : 700) || Math.abs(d.input.ball.velocity.z) > 530);
 	}
 	
 	public static boolean shouldContinueAerial(DuiData d){

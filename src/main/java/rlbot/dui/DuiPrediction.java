@@ -28,26 +28,26 @@ public class DuiPrediction {
 		positions = new Vector3[fps * maxSeconds];
 		furthestCalculated = 0;
 		
-//		if(!ball.velocity.isZero()){
-			try {
-			    final BallPrediction ballPrediction = RLBotDll.getBallPrediction();
-	
-			    for(int i = 0; i < ballPrediction.slicesLength(); i++){
-			    	Vector3 location = Vector3.fromFlatbuffer(ballPrediction.slices(i).physics().location());
-			    	positions[i] = location;
-			    	furthestCalculated = i;
-			    	if(i != 0 && render) r.drawLine3d(Color.yellow, positions[i - 1].toFramework(), location.toFramework());
-			    	
-			    	if(Math.abs(positions[i].y) > 5120 && Math.abs(positions[i].x) < 800 && Math.abs(positions[i].z) < 580){
-			    		danger = (positions[i].y < 0 == (Dui.team == 0));
-						nice = (positions[i].y > 0 == (Dui.team == 0));
-					}
-			    }
-			    
-			}catch(IOException e){}
-//		}
+		try {
+			final BallPrediction ballPrediction = RLBotDll.getBallPrediction();
+
+			for(int i = 0; i < ballPrediction.slicesLength(); i++){
+				Vector3 location = Vector3.fromFlatbuffer(ballPrediction.slices(i).physics().location());
+				positions[i] = location;
+				furthestCalculated = i;
+				if(i != 0 && render) r.drawLine3d(Color.WHITE, positions[i - 1].toFramework(), location.toFramework());
+
+				if(Math.abs(positions[i].y) > 5120 + 93){
+					danger = (positions[i].y < 0 == (Dui.team == 0));
+					nice = (positions[i].y > 0 == (Dui.team == 0));
+				}
+			}
+
+		}catch(IOException e){
+			e.printStackTrace();
+		}
 		
-		if(positions.length == 0) positions[0] = ball.position.clone();
+		if(furthestCalculated == 0) positions[0] = ball.position.clone();
 	}
 	
 	public static Vector3 ballAfterSeconds(double seconds){

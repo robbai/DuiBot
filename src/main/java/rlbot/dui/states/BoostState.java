@@ -20,8 +20,8 @@ public class BoostState extends State {
 
 	@Override
 	public double getOutput(DuiData d){ 		
-		BoostPad b = getNearestBoostpad(d.carPosition);
-        if(b != null && !DuiPrediction.isDanger() && !KickoffState.isKickoff(d.input.ball)){
+		BoostPad b = getNearestBoostpad(d.ballPosition, d.ballDistance);
+        if(b != null && !DuiPrediction.isDanger() && !KickoffState.isKickoff(d.input.ball) && d.car.boost < 30){
         	Vector2 boostLocation = b.getLocation().flatten();
         	double boostDistance = d.carPosition.distance(boostLocation);
         	double angle = Math.toDegrees(d.carDirection.correctionAngle(boostLocation.minus(d.carPosition)));
@@ -39,14 +39,13 @@ public class BoostState extends State {
         }
 	}
 	
-	private BoostPad getNearestBoostpad(Vector2 carPosition){
-		if(carPosition == null) return null;
+	private BoostPad getNearestBoostpad(Vector2 distanceFrom, double bestDistance){
+		if(distanceFrom == null) return null;
     	BoostPad best = null;
-    	double bestDistance = 0;    	 	
     	for(BoostPad b : BoostManager.getFullBoosts()){
 			Vector2 pos = b.getLocation().flatten();
-			double dist = carPosition.distance(pos);
-    		if(b.isActive() && (best == null || dist < bestDistance)){
+			double dist = distanceFrom.distance(pos);
+    		if(b.isActive() && dist < bestDistance){
     			best = b;
     			bestDistance = dist;
     		}
