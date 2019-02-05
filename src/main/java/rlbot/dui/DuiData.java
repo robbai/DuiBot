@@ -21,7 +21,7 @@ public class DuiData {
 	public double steerOwnGoal;
 	public double steerEnemyGoal;
 	
-	public DuiData(DataPacket input, Renderer r){
+	public DuiData(Dui dui, DataPacket input, Renderer r){
 		//General stuff
 		this.input = input;
 		this.r = r;
@@ -37,12 +37,12 @@ public class DuiData {
                 
         //Get distances in unreal units
         ballDistance = carPosition.distance(ballPosition);
-        ownGoalDistance = carPosition.distance(Dui.ownGoal);
+        ownGoalDistance = carPosition.distance(dui.ownGoal);
         
         //Get degrees to turn to certain vectors from the car
         steerBall = Math.toDegrees(carDirection.correctionAngle(ballPosition.minus(carPosition)));
-        steerEnemyGoal = Math.toDegrees(carDirection.correctionAngle(Dui.ownGoal.minus(carPosition)));
-        steerEnemyGoal = Math.toDegrees(carDirection.correctionAngle(Dui.enemyGoal.minus(carPosition)));
+        steerEnemyGoal = Math.toDegrees(carDirection.correctionAngle(dui.ownGoal.minus(carPosition)));
+        steerEnemyGoal = Math.toDegrees(carDirection.correctionAngle(dui.enemyGoal.minus(carPosition)));
 	}
 
 }

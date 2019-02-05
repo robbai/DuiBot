@@ -2,6 +2,7 @@ package rlbot.dui.states;
 
 import java.awt.Color;
 
+import rlbot.dui.Dui;
 import rlbot.dui.DuiData;
 import rlbot.dui.State;
 import rlbot.input.BallData;
@@ -11,8 +12,8 @@ public class CentraliseState extends State {
 	
 	//State which centralises Dui when the ball is rolling across the backboard
 
-	public CentraliseState() {
-		super("Centralise", Color.CYAN);
+	public CentraliseState(Dui dui){
+		super(dui, "Centralise", Color.CYAN);
 	}
 
 	@Override

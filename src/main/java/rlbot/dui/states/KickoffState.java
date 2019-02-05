@@ -2,6 +2,7 @@ package rlbot.dui.states;
 
 import java.awt.Color;
 
+import rlbot.dui.Dui;
 import rlbot.dui.DuiData;
 import rlbot.dui.State;
 import rlbot.input.BallData;
@@ -11,8 +12,8 @@ public class KickoffState extends State {
 	
 	//State which simply curves Dui towards the ball at a kickoff
 
-	public KickoffState() {
-		super("Kickoff", Color.white);
+	public KickoffState(Dui dui){
+		super(dui, "Kickoff", Color.white);
 	}
 
 	@Override

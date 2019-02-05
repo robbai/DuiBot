@@ -11,17 +11,24 @@ import rlbot.render.Renderer;
 
 public class DuiPrediction {
 	
+	/**Determines whether the ball is going into our Dui's own goal*/private boolean danger = false;
+	/**Determines whether the ball is going into the opponent's goal*/private boolean nice = false;
+	/**The amount of seconds currently predicted for the ball*/private int furthestCalculated = 0;
+	/**The amount of seconds ideally predicted for the ball*/private final int maxSeconds = 6;
+	/**Rendering for the ball prediction*/private final boolean render = false;
+	/**The list of vectors for the ball's path*/private Vector3[] positions;
+	/**FPS for the ball prediction*/private final int fps = 60;
 	
-	/**Determines whether the ball is going into our Dui'shome goal*/private static boolean danger = false;
-	/**Determines whether the ball is going into the opponent's goal*/private static boolean nice = false;
-	/**The amount of seconds currently predicted for the ball*/private static int furthestCalculated = 0;
-	/**The amount of seconds ideally predicted for the ball*/private final static int maxSeconds = 6;
-	/**Rendering for the ball prediction*/private final static boolean render = false;
-	/**The list of vectors for the ball's path*/private static Vector3[] positions;
-	/**FPS for the ball prediction*/private final static int fps = 60;
+	private Dui dui;
+		
 	
-	@SuppressWarnings("unused")
-	public static void update(BallData ball, Renderer r){
+	public DuiPrediction(Dui dui){
+		super();
+		this.dui = dui;
+	}
+	
+	@SuppressWarnings("unused") //For the rendering warning
+	public void update(BallData ball, Renderer r){
 		danger = false;
 		nice = false;
 		
@@ -38,8 +45,9 @@ public class DuiPrediction {
 				if(i != 0 && render) r.drawLine3d(Color.WHITE, positions[i - 1].toFramework(), location.toFramework());
 
 				if(Math.abs(positions[i].y) > 5120 + 93){
-					danger = (positions[i].y < 0 == (Dui.team == 0));
-					nice = (positions[i].y > 0 == (Dui.team == 0));
+					danger = (positions[i].y < 0 == (dui.team == 0));
+					nice = (positions[i].y > 0 == (dui.team == 0));
+					break;
 				}
 			}
 
@@ -50,13 +58,14 @@ public class DuiPrediction {
 		if(furthestCalculated == 0) positions[0] = ball.position.clone();
 	}
 	
-	public static Vector3 ballAfterSeconds(double seconds){
+	/**Don't question the 15 rounding thing*/
+	public Vector3 ballAfterSeconds(double seconds){
 		int frame = (int)(Math.max(0, seconds) * 15) * (fps / 15);
 		frame = Math.min(frame, furthestCalculated);
 		return positions[frame];
 	}
 	
-	public static boolean isDanger(){return danger;}
-	public static boolean isNice(){return nice;}
+	public boolean isDanger(){return danger;}
+	public boolean isNice(){return nice;}
 
 }

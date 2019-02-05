@@ -2,7 +2,6 @@ package rlbot.dui.test;
 
 import java.awt.Color;
 
-import rlbot.dui.Dui;
 import rlbot.input.BallData;
 import rlbot.obj.Vector3;
 import rlbot.render.Renderer;
@@ -22,7 +21,7 @@ public class DuiOldPrediction {
 	/**Determines whether the ball is going into the opponent's goal*/
 	private static boolean nice = false;
 	
-	public static void update(BallData ball, Renderer r){
+	public static void update(BallData ball, Renderer r, int team){
 		danger = false;
 		nice = false;
 		
@@ -54,8 +53,8 @@ public class DuiOldPrediction {
 				
 				//It can't be a wall-hit path, otherwise it's unreliable
 				if(!wallHit && Math.abs(positions[i - 1].x) < 800 && Math.abs(positions[i - 1].z) < 570){
-					danger = (positions[i - 1].y < 0 == (Dui.team == 0));
-					nice = (positions[i - 1].y > 0 == (Dui.team == 0));
+					danger = (positions[i - 1].y < 0 == (team == 0));
+					nice = (positions[i - 1].y > 0 == (team == 0));
 				}
 				
 				wallHit = true;

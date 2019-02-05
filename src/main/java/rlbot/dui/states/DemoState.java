@@ -4,7 +4,6 @@ import java.awt.Color;
 
 import rlbot.dui.Dui;
 import rlbot.dui.DuiData;
-import rlbot.dui.DuiPrediction;
 import rlbot.dui.State;
 import rlbot.input.CarData;
 import rlbot.obj.Vector2;
@@ -13,11 +12,11 @@ public class DemoState extends State {
 	
 	//State which is for demolishing opponents!
 	
-	private static int targetIndex = -1;
-	private static long targetSet = 0L;
+	private int targetIndex = -1;
+	private long targetSet = 0L;
 
-	public DemoState(){
-		super("Demo", Color.black);
+	public DemoState(Dui dui){
+		super(dui, "Demo", Color.black);
 	}
 
 	@Override
@@ -34,10 +33,10 @@ public class DemoState extends State {
 			
 		//Chase
 		if(targetIndex != -1){
-			CarData target = Dui.cars[targetIndex];
+			CarData target = dui.cars[targetIndex];
 			double ang = Math.toDegrees(d.carDirection.correctionAngle(target.position.flatten().minus(d.carPosition)));
 			double targetDistance = d.carPosition.distance(target.position.flatten());
-			if(target != null && !DuiPrediction.isDanger() && !target.isSupersonic && ((System.currentTimeMillis() - targetSet < 2750) || DuiPrediction.isNice() || (Dui.dif(d.steerBall, ang) < 20 && d.ballDistance > targetDistance))){
+			if(target != null && !dui.duiPrediction.isDanger() && !target.isSupersonic && ((System.currentTimeMillis() - targetSet < 2750) || dui.duiPrediction.isNice() || (dui.dif(d.steerBall, ang) < 20 && d.ballDistance > targetDistance))){
 				if(System.currentTimeMillis() - targetSet > 8000) targetSet = System.currentTimeMillis();
 //				d.r.drawLine3d(colour, d.carPosition.toFramework(), target.position.flatten().toFramework());
 				d.r.drawCenteredRectangle3d(System.currentTimeMillis() % 2000 > 1000 ? Color.red : Color.orange, target.position.flatten().toFramework(), 30, 30, false);
@@ -50,12 +49,12 @@ public class DemoState extends State {
 		return 0;
 	}
 	
-	private static void getTarget(Vector2 ballPosition){
+	private void getTarget(Vector2 ballPosition){
 		targetIndex = -1;
 		double targetDistanceFromBall = 6000;
-		for(int i = 0; i < Dui.cars.length; i++){
-			CarData c = Dui.cars[i];
-			if(c == null || c.team == Dui.team) continue; 
+		for(int i = 0; i < dui.cars.length; i++){
+			CarData c = dui.cars[i];
+			if(c == null || c.team == dui.team) continue; 
 			double distance = c.position.flatten().distance(ballPosition);
 			if(distance < targetDistanceFromBall){
 				targetIndex = i;

@@ -2,6 +2,7 @@ package rlbot.dui.states;
 
 import java.awt.Color;
 
+import rlbot.dui.Dui;
 import rlbot.dui.DuiData;
 import rlbot.dui.State;
 import rlbot.input.CarData;
@@ -10,8 +11,8 @@ public class WallState extends State {
 	
 	//State which drives Dui to the floor when on a wall
 
-	public WallState() {
-		super("Wall", Color.gray);
+	public WallState(Dui dui){
+		super(dui, "Wall", Color.gray);
 	}
 
 	@Override
